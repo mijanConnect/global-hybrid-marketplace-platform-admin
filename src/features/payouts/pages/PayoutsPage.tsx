@@ -230,7 +230,7 @@ export default function PayoutsPage() {
               setPage(1)
             }}
             placeholder="Search vendor / payout id…"
-            className="w-full md:w-[260px]"
+            className="w-full md:w-65"
           />
         </div>
       }
@@ -339,14 +339,14 @@ export default function PayoutsPage() {
                   <Table className="w-full">
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="w-[120px] py-3 text-xs font-medium uppercase tracking-wide text-[#895129b3]">Payout ID</TableHead>
-                        <TableHead className="min-w-[210px] py-3 text-xs font-medium uppercase tracking-wide text-[#895129b3]">Vendor</TableHead>
-                        <TableHead className="w-[120px] py-3 text-right text-xs font-medium uppercase tracking-wide text-[#895129b3]">Amount</TableHead>
-                        <TableHead className="w-[90px] py-3 text-center text-xs font-medium uppercase tracking-wide text-[#895129b3]">Orders</TableHead>
-                        <TableHead className="w-[100px] py-3 text-xs font-medium uppercase tracking-wide text-[#895129b3]">Method</TableHead>
-                        <TableHead className="w-[130px] py-3 text-xs font-medium uppercase tracking-wide text-[#895129b3]">Request Date</TableHead>
-                        <TableHead className="w-[100px] py-3 text-xs font-medium uppercase tracking-wide text-[#895129b3]">Status</TableHead>
-                        <TableHead className="w-[140px] py-3 pr-6 text-right text-xs font-medium uppercase tracking-wide text-[#895129b3]">Actions</TableHead>
+                        <TableHead className="w-30 py-3 text-xs font-medium uppercase tracking-wide text-[#895129b3]">Payout ID</TableHead>
+                        <TableHead className="min-w-52.5 py-3 text-xs font-medium uppercase tracking-wide text-[#895129b3]">Vendor</TableHead>
+                        <TableHead className="w-30 py-3 text-right text-xs font-medium uppercase tracking-wide text-[#895129b3]">Amount</TableHead>
+                        <TableHead className="w-22.5 py-3 text-center text-xs font-medium uppercase tracking-wide text-[#895129b3]">Orders</TableHead>
+                        <TableHead className="w-25 py-3 text-xs font-medium uppercase tracking-wide text-[#895129b3]">Method</TableHead>
+                        <TableHead className="w-32.5 py-3 text-xs font-medium uppercase tracking-wide text-[#895129b3]">Request Date</TableHead>
+                        <TableHead className="w-25 py-3 text-xs font-medium uppercase tracking-wide text-[#895129b3]">Status</TableHead>
+                        <TableHead className="w-35 py-3 pr-6 text-right text-xs font-medium uppercase tracking-wide text-[#895129b3]">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -364,7 +364,7 @@ export default function PayoutsPage() {
                             transition={{ duration: 0.12 }}
                           >
                             <TableCell className="align-middle py-3 font-medium">{p.id}</TableCell>
-                            <TableCell className="min-w-[180px] align-middle py-3">
+                            <TableCell className="min-w-45 align-middle py-3">
                               <div className="space-y-1">
                                 <div className="flex items-center gap-1.5">
                                   <span className="whitespace-nowrap font-medium leading-none">{p.vendor}</span>
@@ -395,20 +395,20 @@ export default function PayoutsPage() {
                                 <StatusBadge status={p.status} />
                               </motion.div>
                             </TableCell>
-                            <TableCell className="w-[140px] align-middle py-3 pr-6 text-right">
+                            <TableCell className="w-35 align-middle py-3 pr-6 text-right">
                               <div className="flex items-center justify-end">
                                 <DropdownMenu>
                                   <DropdownMenuTrigger asChild>
                                     <Button
                                       variant="outline"
                                       size="sm"
-                                      className="h-9 w-[120px] justify-between rounded-lg border border-[#89512920] bg-white px-3 text-xs text-[#895129] hover:bg-[#faf7f3]"
+                                      className="h-9 w-30 justify-between rounded-lg border border-[#89512920] bg-white px-3 text-xs text-[#895129] hover:bg-[#faf7f3]"
                                     >
                                       Actions
                                       <ChevronDown className="h-3.5 w-3.5" />
                                     </Button>
                                   </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end" className="min-w-[10rem]">
+                                  <DropdownMenuContent align="end" className="min-w-40">
                                     {(p.status === 'pending' || p.status === 'hold') && (
                                       <>
                                         <DropdownMenuItem onClick={() => setPayoutStatus(p.id, 'approved')}>
@@ -584,7 +584,7 @@ export default function PayoutsPage() {
                 <div className="text-sm font-medium">Orders breakdown</div>
                 <div className="mt-3 space-y-2">
                   {selected.ordersBreakdown.slice(0, 8).map((o) => (
-                    <div key={o.id} className="flex items-center justify-between rounded-lg bg-black/[0.02] p-3 text-sm">
+                    <div key={o.id} className="flex items-center justify-between rounded-lg bg-black/2 p-3 text-sm">
                       <div className="font-medium">{o.id}</div>
                       <div className="font-medium">{formatMoney(o.amount)}</div>
                     </div>

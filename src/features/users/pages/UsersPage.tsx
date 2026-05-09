@@ -205,7 +205,7 @@ export default function UsersPage() {
               setPage(1)
             }}
             placeholder="Search id/name/email…"
-            className="w-full md:w-[260px]"
+            className="w-full md:w-65"
           />
           <select
             value={role}
@@ -273,7 +273,7 @@ export default function UsersPage() {
                   <TableHead>Status</TableHead>
                   <TableHead>Orders</TableHead>
                   <TableHead>Total Spend</TableHead>
-                  <TableHead className="min-w-[160px] pr-6 text-right">Actions</TableHead>
+                  <TableHead className="min-w-40 pr-6 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -331,7 +331,7 @@ export default function UsersPage() {
                       </TableCell>
                       <TableCell className="align-middle py-4">{u.totalOrders}</TableCell>
                       <TableCell className="align-middle py-4">{formatMoney(u.totalSpent)}</TableCell>
-                      <TableCell className="min-w-[160px] align-middle py-4 pr-6 text-right">
+                      <TableCell className="min-w-40 align-middle py-4 pr-6 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                             <Button
@@ -480,15 +480,15 @@ export default function UsersPage() {
                     Quick snapshot across orders and bookings.
                   </div>
                   <div className="mt-3 grid grid-cols-3 gap-3">
-                    <div className="rounded-lg bg-black/[0.02] p-3">
+                    <div className="rounded-lg bg-black/2 p-3">
                       <div className="text-xs text-muted-foreground">Orders</div>
                       <div className="text-base font-semibold">{selected.totalOrders}</div>
                     </div>
-                    <div className="rounded-lg bg-black/[0.02] p-3">
+                    <div className="rounded-lg bg-black/2 p-3">
                       <div className="text-xs text-muted-foreground">Spend</div>
                       <div className="text-base font-semibold">{formatMoney(selected.totalSpent)}</div>
                     </div>
-                    <div className="rounded-lg bg-black/[0.02] p-3">
+                    <div className="rounded-lg bg-black/2 p-3">
                       <div className="text-xs text-muted-foreground">Bookings</div>
                       <div className="text-base font-semibold">{selected.bookings.length}</div>
                     </div>

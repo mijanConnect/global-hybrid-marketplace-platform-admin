@@ -254,7 +254,7 @@ export default function VendorsPage() {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search business/owner…"
-            className="w-full md:w-[260px]"
+            className="w-full md:w-65"
           />
           <select
             value={country}
@@ -273,14 +273,14 @@ export default function VendorsPage() {
             value={minEarnings}
             onChange={(e) => setMinEarnings(e.target.value)}
             placeholder="Min $"
-            className="w-full md:w-[120px]"
+            className="w-full md:w-30"
           />
           <Input
             inputMode="numeric"
             value={maxEarnings}
             onChange={(e) => setMaxEarnings(e.target.value)}
             placeholder="Max $"
-            className="w-full md:w-[120px]"
+            className="w-full md:w-30"
           />
         </div>
       }
@@ -433,7 +433,7 @@ export default function VendorsPage() {
                   <TableHead>Total Orders</TableHead>
                   <TableHead>Earnings</TableHead>
                   <TableHead>Joined Date</TableHead>
-                  <TableHead className="min-w-[240px] w-[18%] pr-6 text-right whitespace-nowrap">
+                  <TableHead className="min-w-60 w-[18%] pr-6 text-right whitespace-nowrap">
                     Actions
                   </TableHead>
                 </TableRow>
@@ -479,7 +479,7 @@ export default function VendorsPage() {
                         <Money value={v.earnings} />
                       </TableCell>
                       <TableCell className="text-muted-foreground">{v.joinedAt}</TableCell>
-                      <TableCell className="min-w-[240px] w-[18%] align-middle py-4 pr-6">
+                      <TableCell className="min-w-60 w-[18%] align-middle py-4 pr-6">
                         <div className="flex flex-nowrap items-center justify-end gap-2 whitespace-nowrap">
                           <motion.div
                             className="inline-flex shrink-0 items-center justify-center leading-none"
@@ -632,14 +632,14 @@ export default function VendorsPage() {
               <div className="rounded-lg border border-[#EEE7DF] p-4">
                 <div className="text-sm font-medium">Documents</div>
                 <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <div className="flex items-center justify-between rounded-lg bg-black/[0.02] p-3">
+                  <div className="flex items-center justify-between rounded-lg bg-black/2 p-3">
                     <div>
                       <div className="text-sm font-medium">Trade license</div>
                       <div className="text-xs text-muted-foreground">Business registration</div>
                     </div>
                     <DocBadge status={selected.documents.tradeLicense} />
                   </div>
-                  <div className="flex items-center justify-between rounded-lg bg-black/[0.02] p-3">
+                  <div className="flex items-center justify-between rounded-lg bg-black/2 p-3">
                     <div>
                       <div className="text-sm font-medium">ID verification</div>
                       <div className="text-xs text-muted-foreground">Owner identity</div>

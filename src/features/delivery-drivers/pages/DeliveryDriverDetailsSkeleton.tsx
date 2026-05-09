@@ -18,7 +18,7 @@ export function DeliveryDriverDetailsSkeleton() {
         ))}
       </div>
       <div className="h-12 rounded-xl bg-muted" />
-      <div className="h-[420px] rounded-xl bg-muted" />
+      <div className="h-105 rounded-xl bg-muted" />
     </div>
   )
 }

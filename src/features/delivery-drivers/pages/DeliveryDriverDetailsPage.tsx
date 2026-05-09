@@ -190,7 +190,7 @@ export default function DeliveryDriverDetailsPage() {
         <span className="text-sm text-muted-foreground">{d.id}</span>
       </div>
 
-      <div className="rounded-2xl border border-[#EEE7DF] bg-gradient-to-br from-white to-primary/[0.05] p-6 shadow-soft md:p-8">
+      <div className="rounded-2xl border border-[#EEE7DF] bg-linear-to-br from-white to-primary/[0.05] p-6 shadow-soft md:p-8">
         <div className="flex flex-col gap-6 xl:flex-row xl:justify-between">
           <div className="flex flex-col gap-4 sm:flex-row">
             <Avatar className="h-24 w-24 rounded-2xl border border-primary/20 sm:h-28 sm:w-28">
@@ -291,7 +291,7 @@ export default function DeliveryDriverDetailsPage() {
               <Badge variant="secondary">Demo</Badge>
             </CardHeader>
             <CardContent className="p-0">
-              <div className="relative flex h-[220px] items-center justify-center bg-gradient-to-br from-primary/10 to-muted/30">
+              <div className="relative flex h-55 items-center justify-center bg-linear-to-br from-primary/10 to-muted/30">
                 <div
                   className="absolute inset-0 opacity-30"
                   style={{
@@ -357,7 +357,7 @@ export default function DeliveryDriverDetailsPage() {
           </DialogHeader>
           <textarea
             className={cn(
-              'min-h-[96px] w-full rounded-xl border border-[#EEE7DF] px-3 py-2 text-sm',
+              'min-h-24 w-full rounded-xl border border-[#EEE7DF] px-3 py-2 text-sm',
               'outline-none focus-visible:ring-2 focus-visible:ring-primary/30',
             )}
             value={rejectReason}

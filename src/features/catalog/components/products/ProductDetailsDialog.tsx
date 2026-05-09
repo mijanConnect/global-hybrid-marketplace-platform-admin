@@ -1,5 +1,5 @@
-import type { Dispatch, SetStateAction } from 'react'
-import { motion } from 'framer-motion'
+import type { Dispatch, SetStateAction } from "react";
+import { motion } from "framer-motion";
 
 import {
   Dialog,
@@ -8,22 +8,25 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { StatusBadge } from '@/components/shared/StatusBadge'
-import type { ProductRow } from '@/features/catalog/lib/mockProductsData'
-import { formatMoney, statusLabel } from '@/features/catalog/utils/productFormatters'
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { StatusBadge } from "@/components/shared/StatusBadge";
+import type { ProductRow } from "@/features/catalog/lib/mockProductsData";
+import {
+  formatMoney,
+  statusLabel,
+} from "@/features/catalog/utils/productFormatters";
 
 type Props = {
-  selected: ProductRow | null
-  setSelected: Dispatch<SetStateAction<ProductRow | null>>
-  editMode: boolean
-  setEditMode: (value: boolean) => void
-  categories: string[]
-  onToggleActive: (productId: string) => void
-  onSaveEdited: (next: ProductRow) => void
-}
+  selected: ProductRow | null;
+  setSelected: Dispatch<SetStateAction<ProductRow | null>>;
+  editMode: boolean;
+  setEditMode: (value: boolean) => void;
+  categories: string[];
+  onToggleActive: (productId: string) => void;
+  onSaveEdited: (next: ProductRow) => void;
+};
 
 export function ProductDetailsDialog({
   selected,
@@ -39,16 +42,20 @@ export function ProductDetailsDialog({
       open={!!selected}
       onOpenChange={(open) => {
         if (!open) {
-          setSelected(null)
-          setEditMode(false)
+          setSelected(null);
+          setEditMode(false);
         }
       }}
     >
       <DialogContent className="max-w-3xl">
         <DialogHeader>
-          <DialogTitle>{editMode ? 'Edit product' : 'Product details'}</DialogTitle>
+          <DialogTitle>
+            {editMode ? "Edit product" : "Product details"}
+          </DialogTitle>
           <DialogDescription>
-            {selected ? `${selected.name} • ${statusLabel(selected.status)}` : ''}
+            {selected
+              ? `${selected.name} • ${statusLabel(selected.status)}`
+              : ""}
           </DialogDescription>
         </DialogHeader>
 
@@ -67,16 +74,22 @@ export function ProductDetailsDialog({
                     <>
                       <Input
                         value={selected.name}
-                        onChange={(e) => setSelected({ ...selected, name: e.target.value })}
+                        onChange={(e) =>
+                          setSelected({ ...selected, name: e.target.value })
+                        }
                       />
                       <Input
                         value={selected.vendor}
-                        onChange={(e) => setSelected({ ...selected, vendor: e.target.value })}
+                        onChange={(e) =>
+                          setSelected({ ...selected, vendor: e.target.value })
+                        }
                         placeholder="Vendor"
                       />
                       <select
                         value={selected.category}
-                        onChange={(e) => setSelected({ ...selected, category: e.target.value })}
+                        onChange={(e) =>
+                          setSelected({ ...selected, category: e.target.value })
+                        }
                         className="h-10 w-full rounded-lg border border-[#EEE7DF] bg-white px-3 text-sm"
                       >
                         {categories.map((c) => (
@@ -90,7 +103,10 @@ export function ProductDetailsDialog({
                           inputMode="numeric"
                           value={String(selected.price)}
                           onChange={(e) =>
-                            setSelected({ ...selected, price: Number(e.target.value || 0) })
+                            setSelected({
+                              ...selected,
+                              price: Number(e.target.value || 0),
+                            })
                           }
                           placeholder="Price"
                         />
@@ -98,7 +114,10 @@ export function ProductDetailsDialog({
                           inputMode="numeric"
                           value={String(selected.stock)}
                           onChange={(e) =>
-                            setSelected({ ...selected, stock: Number(e.target.value || 0) })
+                            setSelected({
+                              ...selected,
+                              stock: Number(e.target.value || 0),
+                            })
                           }
                           placeholder="Stock"
                         />
@@ -120,7 +139,9 @@ export function ProductDetailsDialog({
                       </div>
                       <div className="flex items-center justify-between">
                         <div className="text-muted-foreground">Price</div>
-                        <div className="font-medium">{formatMoney(selected.price)}</div>
+                        <div className="font-medium">
+                          {formatMoney(selected.price)}
+                        </div>
                       </div>
                       <div className="flex items-center justify-between">
                         <div className="text-muted-foreground">Stock</div>
@@ -134,42 +155,51 @@ export function ProductDetailsDialog({
               <div className="rounded-lg border border-[#EEE7DF] p-4">
                 <div className="text-sm font-medium">Sales info</div>
                 <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
-                  <div className="rounded-lg bg-black/[0.02] p-3">
-                    <div className="text-xs text-muted-foreground">Total sales</div>
-                    <div className="text-base font-semibold">{selected.totalSales}</div>
+                  <div className="rounded-lg bg-black/2 p-3">
+                    <div className="text-xs text-muted-foreground">
+                      Total sales
+                    </div>
+                    <div className="text-base font-semibold">
+                      {selected.totalSales}
+                    </div>
                   </div>
-                  <div className="rounded-lg bg-black/[0.02] p-3">
+                  <div className="rounded-lg bg-black/2 p-3">
                     <div className="text-xs text-muted-foreground">Revenue</div>
                     <div className="text-base font-semibold">
                       {formatMoney(selected.totalSales * selected.price)}
                     </div>
                   </div>
-                  <div className="rounded-lg bg-black/[0.02] p-3 col-span-2">
+                  <div className="rounded-lg bg-black/2 p-3 col-span-2">
                     <div className="text-xs text-muted-foreground">Status</div>
                     <div className="mt-1 flex items-center justify-between">
                       <StatusBadge status={selected.status} />
-                      <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                      <motion.div
+                        whileHover={{ scale: 1.03 }}
+                        whileTap={{ scale: 0.97 }}
+                      >
                         <Button
                           size="sm"
-                          variant={selected.status === 'active' ? 'outline' : 'default'}
+                          variant={
+                            selected.status === "active" ? "outline" : "default"
+                          }
                           onClick={() => {
-                            onToggleActive(selected.id)
+                            onToggleActive(selected.id);
                             setSelected((prev) =>
                               !prev
                                 ? prev
                                 : {
                                     ...prev,
                                     status:
-                                      prev.status === 'active'
-                                        ? 'inactive'
+                                      prev.status === "active"
+                                        ? "inactive"
                                         : prev.stock === 0
-                                          ? 'out_of_stock'
-                                          : 'active',
+                                          ? "out_of_stock"
+                                          : "active",
                                   },
-                            )
+                            );
                           }}
                         >
-                          {selected.status === 'active' ? 'Disable' : 'Enable'}
+                          {selected.status === "active" ? "Disable" : "Enable"}
                         </Button>
                       </motion.div>
                     </div>
@@ -184,7 +214,9 @@ export function ProductDetailsDialog({
                 {editMode ? (
                   <textarea
                     value={selected.description}
-                    onChange={(e) => setSelected({ ...selected, description: e.target.value })}
+                    onChange={(e) =>
+                      setSelected({ ...selected, description: e.target.value })
+                    }
                     className="min-h-24 w-full rounded-lg border border-[#EEE7DF] bg-white p-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
                   />
                 ) : (
@@ -212,17 +244,17 @@ export function ProductDetailsDialog({
                   <Button
                     variant="outline"
                     onClick={() => {
-                      setSelected(null)
-                      setEditMode(false)
+                      setSelected(null);
+                      setEditMode(false);
                     }}
                   >
                     Cancel
                   </Button>
                   <Button
                     onClick={() => {
-                      onSaveEdited(selected)
-                      setSelected(null)
-                      setEditMode(false)
+                      onSaveEdited(selected);
+                      setSelected(null);
+                      setEditMode(false);
                     }}
                   >
                     Save changes
@@ -232,8 +264,8 @@ export function ProductDetailsDialog({
                 <Button
                   variant="outline"
                   onClick={() => {
-                    setSelected(null)
-                    setEditMode(false)
+                    setSelected(null);
+                    setEditMode(false);
                   }}
                 >
                   Close
@@ -244,6 +276,5 @@ export function ProductDetailsDialog({
         )}
       </DialogContent>
     </Dialog>
-  )
+  );
 }
-

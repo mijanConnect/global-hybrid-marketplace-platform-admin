@@ -202,7 +202,7 @@ export function DriverDetailsTabs({
             <CardHeader>
               <CardTitle className="text-base">Weekly activity</CardTitle>
             </CardHeader>
-            <CardContent className="h-[220px]">
+            <CardContent className="h-55">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={driver.activityHeatmap}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#0000000d" />
@@ -218,7 +218,7 @@ export function DriverDetailsTabs({
             <CardHeader>
               <CardTitle className="text-base">Satisfaction</CardTitle>
             </CardHeader>
-            <CardContent className="h-[220px]">
+            <CardContent className="h-55">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={driver.satisfactionSeries}>
                   <defs>
@@ -252,7 +252,7 @@ export function DriverDetailsTabs({
             <CardHeader>
               <CardTitle className="text-base">Weekly earnings</CardTitle>
             </CardHeader>
-            <CardContent className="h-[260px]">
+            <CardContent className="h-65">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={driver.weeklyEarningsSeries}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#0000000d" />
@@ -268,7 +268,7 @@ export function DriverDetailsTabs({
             <CardHeader>
               <CardTitle className="text-base">Monthly</CardTitle>
             </CardHeader>
-            <CardContent className="h-[240px]">
+            <CardContent className="h-60">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={driver.monthlyEarningsFull}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#0000000d" />
@@ -284,7 +284,7 @@ export function DriverDetailsTabs({
             <CardHeader>
               <CardTitle className="text-base">Yearly</CardTitle>
             </CardHeader>
-            <CardContent className="h-[240px]">
+            <CardContent className="h-60">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={driver.yearlyEarningsSeries}>
                   <defs>
@@ -414,9 +414,9 @@ export function DriverDetailsTabs({
                   <MotionRow key={row.id} whileHover={{ backgroundColor: 'rgba(137,81,41,0.06)' }}>
                     <TableCell className="font-mono text-xs whitespace-nowrap">{row.id}</TableCell>
                     <TableCell>{row.customer}</TableCell>
-                    <TableCell className="max-w-[120px] truncate text-muted-foreground">{row.vendor}</TableCell>
-                    <TableCell className="max-w-[140px] truncate text-xs">{row.pickup}</TableCell>
-                    <TableCell className="max-w-[140px] truncate text-xs">{row.dropoff}</TableCell>
+                    <TableCell className="max-w-30 truncate text-muted-foreground">{row.vendor}</TableCell>
+                    <TableCell className="max-w-35 truncate text-xs">{row.pickup}</TableCell>
+                    <TableCell className="max-w-35 truncate text-xs">{row.dropoff}</TableCell>
                     <TableCell>{row.distanceKm.toFixed(1)}</TableCell>
                     <TableCell>{formatMoney(row.deliveryFee)}</TableCell>
                     <TableCell>
@@ -463,7 +463,7 @@ export function DriverDetailsTabs({
             <CardHeader>
               <CardTitle className="text-sm">Distribution</CardTitle>
             </CardHeader>
-            <CardContent className="h-[180px]">
+            <CardContent className="h-45">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={ratingBuckets} layout="vertical" margin={{ left: 4 }}>
                   <XAxis type="number" allowDecimals={false} />
@@ -508,7 +508,7 @@ export function DriverDetailsTabs({
                 </Badge>
               </CardHeader>
               <CardContent className="space-y-3 p-0">
-                <div className="aspect-[16/10] bg-muted">
+                <div className="aspect-16/10 bg-muted">
                   <img src={doc.previewUrl} alt="" className="h-full w-full object-cover" />
                 </div>
                 <div className="flex gap-2 px-4 pb-4">

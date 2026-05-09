@@ -50,15 +50,15 @@ export function ProductTable({
               aria-label="Select all"
             />
           </TableHead>
-          <TableHead className="w-[220px]">Product</TableHead>
-          <TableHead className="w-[150px]">Vendor</TableHead>
+          <TableHead className="w-55">Product</TableHead>
+          <TableHead className="w-37.5">Vendor</TableHead>
           <TableHead>Category</TableHead>
           <TableHead>Price</TableHead>
           <TableHead>Stock</TableHead>
           <TableHead>Country</TableHead>
           <TableHead>Status</TableHead>
           <TableHead>Created</TableHead>
-          <TableHead className="w-[220px] pr-4 text-right whitespace-nowrap">Actions</TableHead>
+          <TableHead className="w-55 pr-4 text-right whitespace-nowrap">Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -108,7 +108,7 @@ export function ProductTable({
                 <StatusBadge status={p.status} />
               </TableCell>
               <TableCell className="align-middle py-3 text-muted-foreground">{p.createdAt}</TableCell>
-              <TableCell className="w-[220px] align-middle py-3 pr-4 text-right">
+              <TableCell className="w-55 align-middle py-3 pr-4 text-right">
                 <ProductRowActions
                   product={p}
                   onView={onView}

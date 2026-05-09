@@ -281,7 +281,7 @@ export default function ServicesPage() {
               setPage(1)
             }}
             placeholder="Search service/provider…"
-            className="w-full md:w-[260px]"
+            className="w-full md:w-65"
           />
           <Button variant="outline" onClick={() => setCategoriesOpen(true)}>
             Manage Service Categories
@@ -470,16 +470,16 @@ export default function ServicesPage() {
                           className="h-4 w-4 align-middle"
                         />
                       </TableHead>
-                      <TableHead className="min-w-[220px] py-2 text-xs font-medium uppercase tracking-wide text-[#895129b3]">Service</TableHead>
-                      <TableHead className="w-[150px] py-2 text-xs font-medium uppercase tracking-wide text-[#895129b3]">Provider</TableHead>
-                      <TableHead className="w-[140px] py-2 text-xs font-medium uppercase tracking-wide text-[#895129b3]">Category</TableHead>
-                      <TableHead className="w-[120px] py-2 text-right text-xs font-medium uppercase tracking-wide text-[#895129b3]">Price</TableHead>
-                      <TableHead className="w-[90px] py-2 text-center text-xs font-medium uppercase tracking-wide text-[#895129b3]">Bookings</TableHead>
-                      <TableHead className="w-[90px] py-2 text-center text-xs font-medium uppercase tracking-wide text-[#895129b3]">Rating</TableHead>
-                      <TableHead className="w-[90px] py-2 text-center text-xs font-medium uppercase tracking-wide text-[#895129b3]">Country</TableHead>
-                      <TableHead className="w-[120px] py-2 text-xs font-medium uppercase tracking-wide text-[#895129b3]">Status</TableHead>
-                      <TableHead className="w-[120px] py-2 text-xs font-medium uppercase tracking-wide text-[#895129b3]">Created</TableHead>
-                      <TableHead className="w-[140px] py-2 text-right text-xs font-medium uppercase tracking-wide text-[#895129b3]">Actions</TableHead>
+                      <TableHead className="min-w-55 py-2 text-xs font-medium uppercase tracking-wide text-[#895129b3]">Service</TableHead>
+                      <TableHead className="w-37.5 py-2 text-xs font-medium uppercase tracking-wide text-[#895129b3]">Provider</TableHead>
+                      <TableHead className="w-35 py-2 text-xs font-medium uppercase tracking-wide text-[#895129b3]">Category</TableHead>
+                      <TableHead className="w-30 py-2 text-right text-xs font-medium uppercase tracking-wide text-[#895129b3]">Price</TableHead>
+                      <TableHead className="w-22.5 py-2 text-center text-xs font-medium uppercase tracking-wide text-[#895129b3]">Bookings</TableHead>
+                      <TableHead className="w-22.5 py-2 text-center text-xs font-medium uppercase tracking-wide text-[#895129b3]">Rating</TableHead>
+                      <TableHead className="w-22.5 py-2 text-center text-xs font-medium uppercase tracking-wide text-[#895129b3]">Country</TableHead>
+                      <TableHead className="w-30 py-2 text-xs font-medium uppercase tracking-wide text-[#895129b3]">Status</TableHead>
+                      <TableHead className="w-30 py-2 text-xs font-medium uppercase tracking-wide text-[#895129b3]">Created</TableHead>
+                      <TableHead className="w-35 py-2 text-right text-xs font-medium uppercase tracking-wide text-[#895129b3]">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -690,17 +690,17 @@ export default function ServicesPage() {
                 <div className="rounded-lg border border-[#EEE7DF] p-4">
                   <div className="text-sm font-medium">Pricing</div>
                   <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
-                    <div className="rounded-lg bg-black/[0.02] p-3">
+                    <div className="rounded-lg bg-black/2 p-3">
                       <div className="text-xs text-muted-foreground">Price</div>
                       <div className="text-base font-semibold">{formatMoney(selected.price)}</div>
                     </div>
-                    <div className="rounded-lg bg-black/[0.02] p-3">
+                    <div className="rounded-lg bg-black/2 p-3">
                       <div className="text-xs text-muted-foreground">Type</div>
                       <div className="text-base font-semibold">
                         <PricingBadge pricingType={selected.pricingType} />
                       </div>
                     </div>
-                    <div className="rounded-lg bg-black/[0.02] p-3 col-span-2">
+                    <div className="rounded-lg bg-black/2 p-3 col-span-2">
                       <div className="text-xs text-muted-foreground">Status control</div>
                       <div className="mt-2 flex items-center justify-between">
                         <StatusBadge status={selected.status} />

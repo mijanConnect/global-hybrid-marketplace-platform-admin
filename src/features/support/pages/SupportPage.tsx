@@ -709,15 +709,15 @@ export default function SupportPage() {
                               <Badge variant="secondary" className="bg-primary/10 text-primary">Insights</Badge>
                             </div>
                             <div className="mt-2 space-y-2 text-sm">
-                              <div className="rounded-xl bg-black/[0.02] p-3">
+                              <div className="rounded-xl bg-black/2 p-3">
                                 <div className="text-[11px] text-muted-foreground">Country</div>
                                 <div className="font-medium text-foreground">{active.country}</div>
                               </div>
-                              <div className="rounded-xl bg-black/[0.02] p-3">
+                              <div className="rounded-xl bg-black/2 p-3">
                                 <div className="text-[11px] text-muted-foreground">Registered</div>
                                 <div className="font-medium text-foreground">{active.stats.registeredAt}</div>
                               </div>
-                              <div className="rounded-xl bg-black/[0.02] p-3">
+                              <div className="rounded-xl bg-black/2 p-3">
                                 <div className="text-[11px] text-muted-foreground">Notes</div>
                                 <div className="text-sm text-muted-foreground">
                                   Fast replies improve satisfaction. Use emojis/attachments UI to simulate real inbox.

@@ -168,7 +168,7 @@ export default function ServiceProvidersPage() {
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Jobs</TableHead>
                   <TableHead className="text-right">Rating</TableHead>
-                  <TableHead className="min-w-[160px] pr-6 text-right">Actions</TableHead>
+                  <TableHead className="min-w-40 pr-6 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -187,7 +187,7 @@ export default function ServiceProvidersPage() {
                     <TableCell className="text-right text-sm tabular-nums">
                       {p.rating > 0 ? p.rating.toFixed(1) : '—'}
                     </TableCell>
-                    <TableCell className="min-w-[160px] pr-6 text-right">
+                    <TableCell className="min-w-40 pr-6 text-right">
                       <Button
                         variant="outline"
                         size="sm"

@@ -191,7 +191,7 @@ export default function AddProductPage() {
                   onChange={(e) => setStock(e.target.value)}
                   inputMode="numeric"
                   placeholder="Stock"
-                  className="sm:max-w-[220px]"
+                  className="sm:max-w-55"
                 />
                 <div className="flex items-center gap-3">
                   <span className="text-sm text-foreground">Active</span>
@@ -242,7 +242,7 @@ export default function AddProductPage() {
                   if (e.key === 'Enter' || e.key === ' ') fileInputRef.current?.click()
                 }}
                 onClick={() => fileInputRef.current?.click()}
-                className="grid min-h-[210px] place-items-center rounded-xl border border-dashed border-[#DCCBBC] bg-[#faf9f7] p-5 text-center"
+                className="grid min-h-52.5 place-items-center rounded-xl border border-dashed border-[#DCCBBC] bg-[#faf9f7] p-5 text-center"
               >
                 {images.length === 0 ? (
                   <div className="space-y-2">

@@ -296,7 +296,7 @@ export default function SettingsLegalPage() {
                                 <textarea
                                   value={current.content}
                                   onChange={(e) => patchCurrent({ content: e.target.value })}
-                                  className="min-h-[320px] w-full resize-none rounded-xl border border-[#EEE7DF] bg-white p-3 text-sm leading-relaxed focus-visible:outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
+                                  className="min-h-80 w-full resize-none rounded-xl border border-[#EEE7DF] bg-white p-3 text-sm leading-relaxed focus-visible:outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
                                 />
                               </div>
 
@@ -356,7 +356,7 @@ export default function SettingsLegalPage() {
                   { label: 'Supported countries', value: current.countries.join(', ') },
                   { label: 'Language', value: current.language },
                 ].map((row) => (
-                  <div key={row.label} className="rounded-xl bg-black/[0.02] p-3">
+                  <div key={row.label} className="rounded-xl bg-black/2 p-3">
                     <div className="text-xs text-muted-foreground">{row.label}</div>
                     <div className="mt-0.5 text-sm font-medium text-foreground">{row.value}</div>
                   </div>

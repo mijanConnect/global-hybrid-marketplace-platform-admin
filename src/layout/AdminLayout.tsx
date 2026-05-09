@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import {
   Bell,
   ChevronDown,
@@ -94,6 +94,7 @@ function SidebarTooltip({ label, collapsed }: { label: string; collapsed: boolea
 
 export function AdminLayout() {
   const location = useLocation()
+  const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const notifications = useAppSelector((s) => s.notifications.items)
   const unreadCount = useMemo(
@@ -108,6 +109,11 @@ export function AdminLayout() {
       delivery: notifications.some((n) => !n.read && n.kind === 'delivery'),
     }
   }, [notifications])
+
+  const handleLogout = () => {
+    localStorage.removeItem('admin_token')
+    navigate('/login')
+  }
 
   const [collapsed, setCollapsed] = useState(() => {
     const raw = localStorage.getItem(COLLAPSE_KEY)
@@ -240,7 +246,7 @@ export function AdminLayout() {
       <motion.aside
         className={cn(
           'fixed inset-y-0 left-0 z-50 h-screen border-r border-[#EEE7DF] bg-[#faf9f7] shadow-sm flex flex-col overflow-hidden',
-          'supports-[backdrop-filter]:bg-[#faf9f7]/90 supports-[backdrop-filter]:backdrop-blur',
+          'supports-backdrop-filter:bg-[#faf9f7]/90 supports-backdrop-filter:backdrop-blur',
         )}
         animate={{
           width: sidebarWidth,
@@ -248,7 +254,7 @@ export function AdminLayout() {
         }}
         transition={{ type: 'spring', stiffness: 260, damping: 30 }}
       >
-        <div className="flex h-16 flex-shrink-0 items-center justify-between px-4">
+        <div className="flex h-16 shrink-0 items-center justify-between px-4">
           <motion.div
             whileHover={{ scale: 1.02 }}
             className={cn('flex items-center gap-3', collapsed && !isMobile && 'justify-center')}
@@ -822,7 +828,7 @@ export function AdminLayout() {
         </div>
 
         {/* Bottom user card */}
-        <div className="flex-shrink-0 px-3 pb-3 pt-3 border-t border-[#EEE7DF]">
+        <div className="shrink-0 px-3 pb-3 pt-3 border-t border-[#EEE7DF]">
           <motion.div
             whileHover={{ y: -1 }}
             className="rounded-2xl border border-[#EEE7DF] bg-white/60 p-3 shadow-soft"
@@ -851,10 +857,7 @@ export function AdminLayout() {
                     variant="destructive"
                     size="sm"
                     className="h-9 px-3"
-                    onClick={() => {
-                      localStorage.removeItem('admin_token')
-                      window.location.reload()
-                    }}
+                    onClick={handleLogout}
                   >
                     <LogOut className="h-4 w-4" />
                     Logout
@@ -879,7 +882,7 @@ export function AdminLayout() {
               >
                 <PanelLeftOpen className="h-5 w-5" />
               </Button>
-              <div className="hidden h-10 md:flex items-center gap-2 rounded-xl border border-[#EEE7DF] bg-white px-3 text-sm text-muted-foreground w-[360px]">
+              <div className="hidden h-10 md:flex items-center gap-2 rounded-xl border border-[#EEE7DF] bg-white px-3 text-sm text-muted-foreground w-90">
                 <Search className="h-4 w-4" />
                 <Input
                   className="h-auto border-0 p-0 shadow-none focus-visible:ring-0"
@@ -926,7 +929,7 @@ export function AdminLayout() {
                     )}
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-[340px]">
+                <DropdownMenuContent align="end" className="w-85">
                   <div className="flex items-center justify-between px-2 py-1.5">
                     <DropdownMenuLabel>Notifications</DropdownMenuLabel>
                     <Button
@@ -938,7 +941,7 @@ export function AdminLayout() {
                     </Button>
                   </div>
                   <DropdownMenuSeparator />
-                  <div className="max-h-[360px] overflow-auto">
+                  <div className="max-h-90 overflow-auto">
                     {notifications.length === 0 ? (
                       <div className="px-3 py-6 text-sm text-muted-foreground">
                         No notifications yet.
@@ -985,10 +988,7 @@ export function AdminLayout() {
                   <DropdownMenuItem>Settings</DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
-                    onClick={() => {
-                      localStorage.removeItem('admin_token')
-                      window.location.reload()
-                    }}
+                    onClick={handleLogout}
                   >
                     Logout
                   </DropdownMenuItem>
@@ -1006,7 +1006,7 @@ export function AdminLayout() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-              className="mx-auto w-full max-w-[1440px]"
+              className="mx-auto w-full"
             >
               <Outlet />
             </motion.div>

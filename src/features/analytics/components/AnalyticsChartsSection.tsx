@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { motion } from "framer-motion";
 import {
   Area,
   AreaChart,
@@ -11,24 +11,26 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-} from 'recharts'
+} from "recharts";
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 function Skeleton({ className }: { className?: string }) {
-  return <div className={`animate-pulse rounded-lg bg-black/5 ${className ?? ''}`} />
+  return (
+    <div className={`animate-pulse rounded-lg bg-black/5 ${className ?? ""}`} />
+  );
 }
 
-type Row = { day: string; revenue: number; orders: number; users: number }
+type Row = { day: string; revenue: number; orders: number; users: number };
 
 export function AnalyticsChartsSection({
   dataset,
   isEmpty,
   formatMoney,
 }: {
-  dataset: Row[]
-  isEmpty: boolean
-  formatMoney: (value: number) => string
+  dataset: Row[];
+  isEmpty: boolean;
+  formatMoney: (value: number) => string;
 }) {
   return (
     <>
@@ -42,13 +44,16 @@ export function AnalyticsChartsSection({
             <CardHeader>
               <CardTitle>Revenue (last 7 days)</CardTitle>
             </CardHeader>
-            <CardContent className="h-[280px]">
+            <CardContent className="h-70">
               {isEmpty ? (
-                <Skeleton className="h-[240px] w-full" />
+                <Skeleton className="h-60 w-full" />
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={dataset}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke="rgba(0,0,0,0.06)"
+                    />
                     <XAxis dataKey="day" tickLine={false} axisLine={false} />
                     <YAxis tickLine={false} axisLine={false} />
                     <Tooltip formatter={(v) => formatMoney(Number(v))} />
@@ -78,13 +83,16 @@ export function AnalyticsChartsSection({
             <CardHeader>
               <CardTitle>Orders</CardTitle>
             </CardHeader>
-            <CardContent className="h-[280px]">
+            <CardContent className="h-70">
               {isEmpty ? (
-                <Skeleton className="h-[240px] w-full" />
+                <Skeleton className="h-60 w-full" />
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={dataset}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke="rgba(0,0,0,0.06)"
+                    />
                     <XAxis dataKey="day" tickLine={false} axisLine={false} />
                     <YAxis tickLine={false} axisLine={false} />
                     <Tooltip />
@@ -113,13 +121,16 @@ export function AnalyticsChartsSection({
           <CardHeader>
             <CardTitle>Users growth</CardTitle>
           </CardHeader>
-          <CardContent className="h-[260px]">
+          <CardContent className="h-65">
             {isEmpty ? (
-              <Skeleton className="h-[220px] w-full" />
+              <Skeleton className="h-55 w-full" />
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={dataset}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="rgba(0,0,0,0.06)"
+                  />
                   <XAxis dataKey="day" tickLine={false} axisLine={false} />
                   <YAxis tickLine={false} axisLine={false} />
                   <Tooltip />
@@ -139,6 +150,5 @@ export function AnalyticsChartsSection({
         </Card>
       </motion.div>
     </>
-  )
+  );
 }
-

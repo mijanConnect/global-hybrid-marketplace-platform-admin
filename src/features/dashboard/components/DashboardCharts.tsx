@@ -31,7 +31,7 @@ export function DashboardCharts({
           <CardHeader className="pb-2">
             <CardTitle>Orders trend</CardTitle>
           </CardHeader>
-          <CardContent className="h-[280px] pt-2">
+          <CardContent className="h-70 pt-2">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={ordersTrend}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(137,81,41,0.12)" />
@@ -59,7 +59,7 @@ export function DashboardCharts({
           <CardHeader className="pb-2">
             <CardTitle>Revenue</CardTitle>
           </CardHeader>
-          <CardContent className="h-[280px] pt-2">
+          <CardContent className="h-70 pt-2">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={revenueTrend}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(137,81,41,0.12)" />

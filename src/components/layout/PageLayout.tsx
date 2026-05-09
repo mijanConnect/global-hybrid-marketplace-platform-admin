@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils'
 
 export function PageContainer({ className, children }: PropsWithChildren<{ className?: string }>) {
   return (
-    <div className={cn('mx-auto w-full max-w-[1440px] space-y-6', className)}>
+    <div className={cn('mx-auto w-full space-y-6', className)}>
       {children}
     </div>
   )
@@ -36,7 +36,7 @@ export function DashboardCard({ className, children }: PropsWithChildren<{ class
   return (
     <div
       className={cn(
-        'h-full rounded-2xl border border-[rgba(137,81,41,0.12)] bg-white p-6 shadow-[0_2px_10px_rgba(137,81,41,0.06)] transition-all duration-200 ease-out hover:-translate-y-[1px] hover:shadow-[0_6px_18px_rgba(137,81,41,0.12)]',
+        'h-full rounded-2xl border border-[rgba(137,81,41,0.12)] bg-white p-6 shadow-[0_2px_10px_rgba(137,81,41,0.06)] transition-all duration-200 ease-out hover:-translate-y-px hover:shadow-[0_6px_18px_rgba(137,81,41,0.12)]',
         className,
       )}
     >

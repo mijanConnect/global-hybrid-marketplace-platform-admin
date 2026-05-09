@@ -532,7 +532,7 @@ export default function OrdersPage() {
                       <TableHead>Payment</TableHead>
                       <TableHead>Delivery</TableHead>
                       <TableHead>Date</TableHead>
-                      <TableHead className="min-w-[160px] pr-6 text-right">Actions</TableHead>
+                      <TableHead className="min-w-40 pr-6 text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -571,7 +571,7 @@ export default function OrdersPage() {
                             <DeliveryBadge status={o.delivery.status} />
                           </TableCell>
                           <TableCell className="text-muted-foreground">{o.createdAt}</TableCell>
-                          <TableCell className="min-w-[160px] pr-6 text-right">
+                          <TableCell className="min-w-40 pr-6 text-right">
                             <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="inline-flex items-center justify-end">
                               <Button
                                 variant="outline"
@@ -693,7 +693,7 @@ export default function OrdersPage() {
                 <div className="text-sm font-medium">Items</div>
                 <div className="mt-3 space-y-2">
                   {selected.items.map((i, idx) => (
-                    <div key={`${selected.id}-it-${idx}`} className="flex items-center justify-between rounded-lg bg-black/[0.02] p-3 text-sm">
+                    <div key={`${selected.id}-it-${idx}`} className="flex items-center justify-between rounded-lg bg-black/2 p-3 text-sm">
                       <div className="font-medium">
                         {i.title} <span className="text-muted-foreground">×{i.qty}</span>
                       </div>

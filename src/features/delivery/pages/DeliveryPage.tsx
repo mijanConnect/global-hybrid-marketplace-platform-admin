@@ -450,7 +450,7 @@ export default function DeliveryPage() {
                       <TableHead>Pickup → Drop</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>ETA</TableHead>
-                      <TableHead className="min-w-[160px] pr-6 text-right">Actions</TableHead>
+                      <TableHead className="min-w-40 pr-6 text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -490,7 +490,7 @@ export default function DeliveryPage() {
                             </motion.div>
                           </TableCell>
                           <TableCell>{d.eta}</TableCell>
-                          <TableCell className="min-w-[160px] pr-6 text-right">
+                          <TableCell className="min-w-40 pr-6 text-right">
                             <div className="flex flex-wrap items-center justify-end gap-3">
                               <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                                 <Button
@@ -658,11 +658,11 @@ export default function DeliveryPage() {
               <div className="rounded-lg border border-[#EEE7DF] p-4">
                 <div className="text-sm font-medium">Locations</div>
                 <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 text-sm">
-                  <div className="rounded-lg bg-black/[0.02] p-3">
+                  <div className="rounded-lg bg-black/2 p-3">
                     <div className="text-xs text-muted-foreground">Pickup</div>
                     <div className="font-medium">{selected.pickup}</div>
                   </div>
-                  <div className="rounded-lg bg-black/[0.02] p-3">
+                  <div className="rounded-lg bg-black/2 p-3">
                     <div className="text-xs text-muted-foreground">Drop</div>
                     <div className="font-medium">{selected.drop}</div>
                   </div>
@@ -689,7 +689,7 @@ export default function DeliveryPage() {
 
               <div className="rounded-lg border border-[#EEE7DF] p-4">
                 <div className="text-sm font-medium">Live tracking (mock)</div>
-                <div className="mt-3 h-44 rounded-lg border border-[#EEE7DF] bg-black/[0.02] grid place-items-center text-sm text-muted-foreground">
+                <div className="mt-3 h-44 rounded-lg border border-[#EEE7DF] bg-black/2 grid place-items-center text-sm text-muted-foreground">
                   Map placeholder
                 </div>
               </div>
