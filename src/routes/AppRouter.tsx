@@ -9,6 +9,7 @@ import {
 import { AdminLayout } from "@/layout/AdminLayout";
 import { AuthLayout } from "@/layout/AuthLayout";
 import { DeliveryDriverDetailsSkeleton } from "@/features/delivery-drivers/pages/DeliveryDriverDetailsSkeleton";
+import HeroSection from "@/features/hero/HeroSection";
 
 const DashboardPage = lazy(
   () => import("@/features/dashboard/pages/DashboardPage"),
@@ -127,6 +128,7 @@ const router = createBrowserRouter([
       { path: "/orders", element: <OrdersPage /> },
       { path: "/delivery", element: <DeliveryPage /> },
       { path: "/payouts", element: <PayoutsPage /> },
+      { path: "/hero", element: <HeroSection /> },
       { path: "/support", element: <SupportPage /> },
       { path: "/analytics", element: <AnalyticsPage /> },
       { path: "/settings", element: <SettingsPage /> },

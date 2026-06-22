@@ -1,6 +1,12 @@
-import { useEffect, useMemo, useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
-import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { useEffect, useMemo, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  Link,
+  NavLink,
+  Outlet,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import {
   Bell,
   ChevronDown,
@@ -9,12 +15,11 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Search,
-} from 'lucide-react'
-
-import { adminMenu } from '@/layout/adminMenu'
-import { cn } from '@/lib/utils'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
+} from "lucide-react";
+import { adminMenu } from "@/layout/adminMenu";
+import { cn } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,212 +27,242 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { useAppDispatch, useAppSelector } from '@/hooks/redux'
-import { markAllRead } from '@/app/notifications/notificationsSlice'
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useAppDispatch, useAppSelector } from "@/hooks/redux";
+import { markAllRead } from "@/app/notifications/notificationsSlice";
+const COLLAPSE_KEY = "admin_sidebar_collapsed";
+const SETTINGS_OPEN_KEY = "admin_sidebar_settings_open";
+const VENDORS_OPEN_KEY = "admin_sidebar_vendors_open";
+const PRODUCTS_OPEN_KEY = "admin_sidebar_products_open";
 
-const COLLAPSE_KEY = 'admin_sidebar_collapsed'
-const SETTINGS_OPEN_KEY = 'admin_sidebar_settings_open'
-const VENDORS_OPEN_KEY = 'admin_sidebar_vendors_open'
-const PRODUCTS_OPEN_KEY = 'admin_sidebar_products_open'
-
-function adminBreadcrumbItems(pathname: string): { label: string; to?: string }[] {
-  if (pathname === '/') {
-    return [{ label: 'Dashboard' }]
+function adminBreadcrumbItems(
+  pathname: string,
+): { label: string; to?: string }[] {
+  if (pathname === "/") {
+    return [{ label: "Dashboard" }];
   }
 
-  const driversList = '/admin/vendors/delivery-drivers'
+  const driversList = "/admin/vendors/delivery-drivers";
   if (pathname.startsWith(`${driversList}/`)) {
     return [
-      { label: 'Dashboard', to: '/' },
-      { label: 'Vendors', to: '/admin/vendors' },
-      { label: 'Delivery Drivers', to: driversList },
-      { label: 'Details' },
-    ]
+      { label: "Dashboard", to: "/" },
+      { label: "Vendors", to: "/admin/vendors" },
+      { label: "Delivery Drivers", to: driversList },
+      { label: "Details" },
+    ];
   }
   if (pathname === driversList) {
     return [
-      { label: 'Dashboard', to: '/' },
-      { label: 'Vendors', to: '/admin/vendors' },
-      { label: 'Delivery Drivers' },
-    ]
+      { label: "Dashboard", to: "/" },
+      { label: "Vendors", to: "/admin/vendors" },
+      { label: "Delivery Drivers" },
+    ];
   }
-  if (pathname === '/admin/vendors') {
-    return [{ label: 'Dashboard', to: '/' }, { label: 'Vendors' }]
+  if (pathname === "/admin/vendors") {
+    return [{ label: "Dashboard", to: "/" }, { label: "Vendors" }];
   }
 
-  const spBase = '/admin/service-providers'
+  const spBase = "/admin/service-providers";
   if (pathname.startsWith(`${spBase}/`) && pathname !== `${spBase}/`) {
     return [
-      { label: 'Dashboard', to: '/' },
-      { label: 'Service Providers', to: spBase },
-      { label: 'Details' },
-    ]
+      { label: "Dashboard", to: "/" },
+      { label: "Service Providers", to: spBase },
+      { label: "Details" },
+    ];
   }
   if (pathname === spBase) {
-    return [{ label: 'Dashboard', to: '/' }, { label: 'Service Providers' }]
+    return [{ label: "Dashboard", to: "/" }, { label: "Service Providers" }];
   }
 
-  if (pathname === '/admin/categories') {
+  if (pathname === "/admin/categories") {
     return [
-      { label: 'Dashboard', to: '/' },
-      { label: 'Products', to: '/products' },
-      { label: 'Categories' },
-    ]
+      { label: "Dashboard", to: "/" },
+      { label: "Products", to: "/products" },
+      { label: "Categories" },
+    ];
   }
 
-  const segments = pathname.split('/').filter(Boolean)
-  const last = segments[segments.length - 1] ?? pathname
-  const label = last.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
-  return [{ label: 'Dashboard', to: '/' }, { label: label }]
+  const segments = pathname.split("/").filter(Boolean);
+  const last = segments[segments.length - 1] ?? pathname;
+  const label = last
+    .replace(/-/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+  return [{ label: "Dashboard", to: "/" }, { label: label }];
 }
 
-function SidebarTooltip({ label, collapsed }: { label: string; collapsed: boolean }) {
-  if (!collapsed) return null
+function SidebarTooltip({
+  label,
+  collapsed,
+}: {
+  label: string;
+  collapsed: boolean;
+}) {
+  if (!collapsed) return null;
   return (
     <span className="pointer-events-none absolute left-full top-1/2 z-50 -translate-y-1/2 whitespace-nowrap rounded-lg border border-[#EEE7DF] bg-white px-2.5 py-1 text-xs text-foreground shadow-soft opacity-0 transition-opacity group-hover:opacity-100 ml-2">
       {label}
     </span>
-  )
+  );
 }
 
 export function AdminLayout() {
-  const location = useLocation()
-  const navigate = useNavigate()
-  const dispatch = useAppDispatch()
-  const notifications = useAppSelector((s) => s.notifications.items)
+  const location = useLocation();
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const notifications = useAppSelector((s) => s.notifications.items);
   const unreadCount = useMemo(
     () => notifications.filter((n) => !n.read).length,
     [notifications],
-  )
+  );
 
   const unreadByKind = useMemo(() => {
     return {
-      support: notifications.some((n) => !n.read && n.kind === 'message'),
-      orders: notifications.some((n) => !n.read && n.kind === 'order'),
-      delivery: notifications.some((n) => !n.read && n.kind === 'delivery'),
-    }
-  }, [notifications])
+      support: notifications.some((n) => !n.read && n.kind === "message"),
+      orders: notifications.some((n) => !n.read && n.kind === "order"),
+      delivery: notifications.some((n) => !n.read && n.kind === "delivery"),
+    };
+  }, [notifications]);
 
   const handleLogout = () => {
-    localStorage.removeItem('admin_token')
-    navigate('/login')
-  }
+    localStorage.removeItem("admin_token");
+    navigate("/login");
+  };
 
   const [collapsed, setCollapsed] = useState(() => {
-    const raw = localStorage.getItem(COLLAPSE_KEY)
-    return raw === '1'
-  })
+    const raw = localStorage.getItem(COLLAPSE_KEY);
+    return raw === "1";
+  });
 
-  const [isMobile, setIsMobile] = useState(() => window.matchMedia('(max-width: 767px)').matches)
-  const [mobileOpen, setMobileOpen] = useState(false)
+  const [isMobile, setIsMobile] = useState(
+    () => window.matchMedia("(max-width: 767px)").matches,
+  );
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const [settingsOpen, setSettingsOpen] = useState(() => {
-    const inSettings = location.pathname.startsWith('/settings')
-    if (inSettings) return true
-    const raw = localStorage.getItem(SETTINGS_OPEN_KEY)
-    return raw !== '0'
-  })
+    const inSettings = location.pathname.startsWith("/settings");
+    if (inSettings) return true;
+    const raw = localStorage.getItem(SETTINGS_OPEN_KEY);
+    return raw !== "0";
+  });
 
   const [vendorsOpen, setVendorsOpen] = useState(() => {
-    const inVendors = location.pathname.startsWith('/admin/vendors')
-    if (inVendors) return true
-    const raw = localStorage.getItem(VENDORS_OPEN_KEY)
-    return raw !== '0'
-  })
+    const inVendors = location.pathname.startsWith("/admin/vendors");
+    if (inVendors) return true;
+    const raw = localStorage.getItem(VENDORS_OPEN_KEY);
+    return raw !== "0";
+  });
 
   const [productsOpen, setProductsOpen] = useState(() => {
     const inProducts =
-      location.pathname.startsWith('/admin/categories') || location.pathname.startsWith('/products')
-    if (inProducts) return true
-    const raw = localStorage.getItem(PRODUCTS_OPEN_KEY)
-    return raw !== '0'
-  })
+      location.pathname.startsWith("/admin/categories") ||
+      location.pathname.startsWith("/products");
+    if (inProducts) return true;
+    const raw = localStorage.getItem(PRODUCTS_OPEN_KEY);
+    return raw !== "0";
+  });
 
   useEffect(() => {
-    const inSettings = location.pathname.startsWith('/settings')
-    if (!inSettings) return
-    const t = window.setTimeout(() => setSettingsOpen(true), 0)
-    return () => window.clearTimeout(t)
-  }, [location.pathname])
+    const inSettings = location.pathname.startsWith("/settings");
+    if (!inSettings) return;
+    const t = window.setTimeout(() => setSettingsOpen(true), 0);
+    return () => window.clearTimeout(t);
+  }, [location.pathname]);
 
   useEffect(() => {
-    const inVendors = location.pathname.startsWith('/admin/vendors')
-    if (!inVendors) return
-    const t = window.setTimeout(() => setVendorsOpen(true), 0)
-    return () => window.clearTimeout(t)
-  }, [location.pathname])
+    const inVendors = location.pathname.startsWith("/admin/vendors");
+    if (!inVendors) return;
+    const t = window.setTimeout(() => setVendorsOpen(true), 0);
+    return () => window.clearTimeout(t);
+  }, [location.pathname]);
 
   useEffect(() => {
     const inProducts =
-      location.pathname.startsWith('/admin/categories') || location.pathname.startsWith('/products')
-    if (!inProducts) return
-    const t = window.setTimeout(() => setProductsOpen(true), 0)
-    return () => window.clearTimeout(t)
-  }, [location.pathname])
+      location.pathname.startsWith("/admin/categories") ||
+      location.pathname.startsWith("/products");
+    if (!inProducts) return;
+    const t = window.setTimeout(() => setProductsOpen(true), 0);
+    return () => window.clearTimeout(t);
+  }, [location.pathname]);
 
   useEffect(() => {
     // collapse settings / vendors menus by default on small screens when not on those routes
-    const mql = window.matchMedia('(max-width: 767px)')
+    const mql = window.matchMedia("(max-width: 767px)");
     const handle = () => {
-      setIsMobile(mql.matches)
-      if (!location.pathname.startsWith('/settings') && mql.matches) setSettingsOpen(false)
-      if (!location.pathname.startsWith('/admin/vendors') && mql.matches) setVendorsOpen(false)
+      setIsMobile(mql.matches);
+      if (!location.pathname.startsWith("/settings") && mql.matches)
+        setSettingsOpen(false);
+      if (!location.pathname.startsWith("/admin/vendors") && mql.matches)
+        setVendorsOpen(false);
       const inProductsRoute =
-        location.pathname.startsWith('/admin/categories') || location.pathname.startsWith('/products')
-      if (!inProductsRoute && mql.matches) setProductsOpen(false)
-    }
-    handle()
-    mql.addEventListener('change', handle)
-    return () => mql.removeEventListener('change', handle)
-  }, [location.pathname])
+        location.pathname.startsWith("/admin/categories") ||
+        location.pathname.startsWith("/products");
+      if (!inProductsRoute && mql.matches) setProductsOpen(false);
+    };
+    handle();
+    mql.addEventListener("change", handle);
+    return () => mql.removeEventListener("change", handle);
+  }, [location.pathname]);
 
-  const sidebarWidth = isMobile ? 300 : collapsed ? 88 : 292
+  const sidebarWidth = isMobile ? 300 : collapsed ? 88 : 292;
 
   const sectionedMenu = useMemo(() => {
-    const isLink = (i: (typeof adminMenu)[number]): i is Extract<(typeof adminMenu)[number], { to: string }> =>
-      !('children' in i)
+    const isLink = (
+      i: (typeof adminMenu)[number],
+    ): i is Extract<(typeof adminMenu)[number], { to: string }> =>
+      !("children" in i);
 
-    const links = adminMenu.filter(isLink)
-    const settingsGroup = adminMenu.find((i) => 'children' in i && i.key === 'settings')
-    const vendorsGroup = adminMenu.find((i) => 'children' in i && i.key === 'vendors')
-    const productsGroup = adminMenu.find((i) => 'children' in i && i.key === 'products')
+    const links = adminMenu.filter(isLink);
+    const settingsGroup = adminMenu.find(
+      (i) => "children" in i && i.key === "settings",
+    );
+    const vendorsGroup = adminMenu.find(
+      (i) => "children" in i && i.key === "vendors",
+    );
+    const productsGroup = adminMenu.find(
+      (i) => "children" in i && i.key === "products",
+    );
 
-    const mainKeys = new Set(['dashboard', 'users'])
+    const mainKeys = new Set(["dashboard", "users"]);
     const managementLinkOrder = [
-      'service_providers',
-      'services',
-      'orders',
-      'delivery',
-      'payouts',
-      'support',
-    ] as const
-    const sysKeys = new Set(['analytics'])
+      "service_providers",
+      "services",
+      "orders",
+      "delivery",
+      "payouts",
+      "hero",
+      "support",
+    ] as const;
+    const sysKeys = new Set(["analytics"]);
 
-    const main = links.filter((l) => mainKeys.has(l.key))
+    const main = links.filter((l) => mainKeys.has(l.key));
     const managementLinks = managementLinkOrder
       .map((key) => links.find((l) => l.key === key))
-      .filter((l): l is NonNullable<(typeof links)[number]> => Boolean(l))
-    const system = links.filter((l) => sysKeys.has(l.key))
+      .filter((l): l is NonNullable<(typeof links)[number]> => Boolean(l));
+    const system = links.filter((l) => sysKeys.has(l.key));
     return {
       main,
       managementLinks,
       system,
-      vendors: vendorsGroup && 'children' in vendorsGroup ? vendorsGroup : null,
-      products: productsGroup && 'children' in productsGroup ? productsGroup : null,
-      settings: settingsGroup && 'children' in settingsGroup ? settingsGroup : null,
-    }
-  }, [])
+      vendors: vendorsGroup && "children" in vendorsGroup ? vendorsGroup : null,
+      products:
+        productsGroup && "children" in productsGroup ? productsGroup : null,
+      settings:
+        settingsGroup && "children" in settingsGroup ? settingsGroup : null,
+    };
+  }, []);
 
-  const breadcrumbItems = useMemo(() => adminBreadcrumbItems(location.pathname), [location.pathname])
+  const breadcrumbItems = useMemo(
+    () => adminBreadcrumbItems(location.pathname),
+    [location.pathname],
+  );
 
   useEffect(() => {
     // close mobile drawer on navigation
-    if (!isMobile) return
-    const t = window.setTimeout(() => setMobileOpen(false), 0)
-    return () => window.clearTimeout(t)
-  }, [isMobile, location.pathname])
+    if (!isMobile) return;
+    const t = window.setTimeout(() => setMobileOpen(false), 0);
+    return () => window.clearTimeout(t);
+  }, [isMobile, location.pathname]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -245,19 +280,22 @@ export function AdminLayout() {
 
       <motion.aside
         className={cn(
-          'fixed inset-y-0 left-0 z-50 h-screen border-r border-[#EEE7DF] bg-[#faf9f7] shadow-sm flex flex-col overflow-hidden',
-          'supports-backdrop-filter:bg-[#faf9f7]/90 supports-backdrop-filter:backdrop-blur',
+          "fixed inset-y-0 left-0 z-50 h-screen border-r border-[#EEE7DF] bg-[#faf9f7] shadow-sm flex flex-col overflow-hidden",
+          "supports-backdrop-filter:bg-[#faf9f7]/90 supports-backdrop-filter:backdrop-blur",
         )}
         animate={{
           width: sidebarWidth,
           x: isMobile ? (mobileOpen ? 0 : -sidebarWidth - 12) : 0,
         }}
-        transition={{ type: 'spring', stiffness: 260, damping: 30 }}
+        transition={{ type: "spring", stiffness: 260, damping: 30 }}
       >
         <div className="flex h-16 shrink-0 items-center justify-between px-4">
           <motion.div
             whileHover={{ scale: 1.02 }}
-            className={cn('flex items-center gap-3', collapsed && !isMobile && 'justify-center')}
+            className={cn(
+              "flex items-center gap-3",
+              collapsed && !isMobile && "justify-center",
+            )}
           >
             <motion.div
               whileHover={{ scale: 1.04 }}
@@ -268,7 +306,9 @@ export function AdminLayout() {
             </motion.div>
             {(!collapsed || isMobile) && (
               <div className="leading-tight">
-                <div className="text-sm font-semibold tracking-tight text-foreground">wak2018</div>
+                <div className="text-sm font-semibold tracking-tight text-foreground">
+                  wak2018
+                </div>
                 <div className="text-xs text-muted-foreground">Admin Panel</div>
               </div>
             )}
@@ -278,12 +318,12 @@ export function AdminLayout() {
             size="icon"
             onClick={() => {
               if (isMobile) {
-                setMobileOpen(false)
-                return
+                setMobileOpen(false);
+                return;
               }
-              const next = !collapsed
-              setCollapsed(next)
-              localStorage.setItem(COLLAPSE_KEY, next ? '1' : '0')
+              const next = !collapsed;
+              setCollapsed(next);
+              localStorage.setItem(COLLAPSE_KEY, next ? "1" : "0");
             }}
             aria-label="Toggle sidebar"
           >
@@ -307,11 +347,11 @@ export function AdminLayout() {
                 )}
                 <div className="space-y-1">
                   {sectionedMenu.main.map((item) => {
-                    const Icon = item.icon
+                    const Icon = item.icon;
                     const showDot =
-                      (item.key === 'support' && unreadByKind.support) ||
-                      (item.key === 'orders' && unreadByKind.orders) ||
-                      (item.key === 'delivery' && unreadByKind.delivery)
+                      (item.key === "support" && unreadByKind.support) ||
+                      (item.key === "orders" && unreadByKind.orders) ||
+                      (item.key === "delivery" && unreadByKind.delivery);
                     return (
                       <NavLink
                         key={item.key}
@@ -319,11 +359,11 @@ export function AdminLayout() {
                         onClick={() => isMobile && setMobileOpen(false)}
                         className={({ isActive }) =>
                           cn(
-                            'group relative flex items-center gap-3 rounded-xl border border-transparent px-3 py-2.5 text-sm font-medium tracking-tight text-muted-foreground transition-colors',
-                            'hover:bg-[#895129]/5 hover:text-[#895129]',
+                            "group relative flex items-center gap-3 rounded-xl border border-transparent px-3 py-2.5 text-sm font-medium tracking-tight text-muted-foreground transition-colors",
+                            "hover:bg-[#895129]/5 hover:text-[#895129]",
                             isActive &&
-                              'bg-primary/10 text-[#895129] border-[#895129]/20 shadow-[0_4px_12px_rgba(137,81,41,0.12)] font-semibold',
-                            collapsed && !isMobile && 'justify-center px-2',
+                              "bg-primary/10 text-[#895129] border-[#895129]/20 shadow-[0_4px_12px_rgba(137,81,41,0.12)] font-semibold",
+                            collapsed && !isMobile && "justify-center px-2",
                           )
                         }
                         title={collapsed && !isMobile ? item.label : undefined}
@@ -343,8 +383,10 @@ export function AdminLayout() {
                               <motion.span
                                 whileHover={{ scale: 1.05 }}
                                 className={cn(
-                                  'relative',
-                                  isActive ? 'text-[#895129]' : 'text-muted-foreground group-hover:text-[#895129]',
+                                  "relative",
+                                  isActive
+                                    ? "text-[#895129]"
+                                    : "text-muted-foreground group-hover:text-[#895129]",
                                 )}
                               >
                                 <Icon className="h-4 w-4" />
@@ -352,13 +394,18 @@ export function AdminLayout() {
                                   <span className="absolute -right-1 -top-1 h-2 w-2 rounded-full bg-red-500 animate-pulse" />
                                 )}
                               </motion.span>
-                              {(!collapsed || isMobile) && <span>{item.label}</span>}
+                              {(!collapsed || isMobile) && (
+                                <span>{item.label}</span>
+                              )}
                             </motion.span>
-                            <SidebarTooltip label={item.label} collapsed={collapsed && !isMobile} />
+                            <SidebarTooltip
+                              label={item.label}
+                              collapsed={collapsed && !isMobile}
+                            />
                           </>
                         )}
                       </NavLink>
-                    )
+                    );
                   })}
                 </div>
               </div>
@@ -375,27 +422,33 @@ export function AdminLayout() {
                   {sectionedMenu.vendors && (
                     <div className="space-y-1">
                       {(() => {
-                        const item = sectionedMenu.vendors
-                        const Icon = item.icon
-                        const isActive = location.pathname.startsWith('/admin/vendors')
-                        const open = vendorsOpen && (!collapsed || isMobile)
+                        const item = sectionedMenu.vendors;
+                        const Icon = item.icon;
+                        const isActive =
+                          location.pathname.startsWith("/admin/vendors");
+                        const open = vendorsOpen && (!collapsed || isMobile);
                         return (
                           <>
                             <button
                               type="button"
                               onClick={() => {
-                                const next = !vendorsOpen
-                                setVendorsOpen(next)
-                                localStorage.setItem(VENDORS_OPEN_KEY, next ? '1' : '0')
+                                const next = !vendorsOpen;
+                                setVendorsOpen(next);
+                                localStorage.setItem(
+                                  VENDORS_OPEN_KEY,
+                                  next ? "1" : "0",
+                                );
                               }}
                               className={cn(
-                                'group relative w-full flex items-center gap-3 rounded-xl border border-transparent px-3 py-2.5 text-sm font-medium tracking-tight text-muted-foreground transition-colors',
-                                'hover:bg-[#895129]/5 hover:text-[#895129]',
+                                "group relative w-full flex items-center gap-3 rounded-xl border border-transparent px-3 py-2.5 text-sm font-medium tracking-tight text-muted-foreground transition-colors",
+                                "hover:bg-[#895129]/5 hover:text-[#895129]",
                                 isActive &&
-                                  'bg-primary/10 text-[#895129] border-[#895129]/20 shadow-[0_4px_12px_rgba(137,81,41,0.12)] font-semibold',
-                                collapsed && !isMobile && 'justify-center px-2',
+                                  "bg-primary/10 text-[#895129] border-[#895129]/20 shadow-[0_4px_12px_rgba(137,81,41,0.12)] font-semibold",
+                                collapsed && !isMobile && "justify-center px-2",
                               )}
-                              title={collapsed && !isMobile ? item.label : undefined}
+                              title={
+                                collapsed && !isMobile ? item.label : undefined
+                              }
                               aria-expanded={open}
                             >
                               {isActive && (
@@ -404,61 +457,84 @@ export function AdminLayout() {
                                   className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-full bg-[#895129]"
                                 />
                               )}
-                              <motion.span whileHover={{ x: 4, scale: 1.01 }} className="flex items-center gap-3">
+                              <motion.span
+                                whileHover={{ x: 4, scale: 1.01 }}
+                                className="flex items-center gap-3"
+                              >
                                 <span
                                   className={cn(
-                                    isActive ? 'text-[#895129]' : 'text-muted-foreground group-hover:text-[#895129]',
+                                    isActive
+                                      ? "text-[#895129]"
+                                      : "text-muted-foreground group-hover:text-[#895129]",
                                   )}
                                 >
                                   <Icon className="h-4 w-4" />
                                 </span>
                                 {(!collapsed || isMobile) && (
                                   <>
-                                    <span className="flex-1 text-left">{item.label}</span>
+                                    <span className="flex-1 text-left">
+                                      {item.label}
+                                    </span>
                                     <ChevronDown
                                       className={cn(
-                                        'h-4 w-4 transition-transform duration-200',
-                                        open && 'rotate-180',
-                                        isActive && 'text-[#895129]',
+                                        "h-4 w-4 transition-transform duration-200",
+                                        open && "rotate-180",
+                                        isActive && "text-[#895129]",
                                       )}
                                     />
                                   </>
                                 )}
                               </motion.span>
-                              <SidebarTooltip label={item.label} collapsed={collapsed && !isMobile} />
+                              <SidebarTooltip
+                                label={item.label}
+                                collapsed={collapsed && !isMobile}
+                              />
                             </button>
 
                             <AnimatePresence initial={false}>
                               {open && (!collapsed || isMobile) && (
                                 <motion.div
                                   initial={{ height: 0, opacity: 0 }}
-                                  animate={{ height: 'auto', opacity: 1 }}
+                                  animate={{ height: "auto", opacity: 1 }}
                                   exit={{ height: 0, opacity: 0 }}
-                                  transition={{ duration: 0.24, ease: [0.4, 0, 0.2, 1] }}
+                                  transition={{
+                                    duration: 0.24,
+                                    ease: [0.4, 0, 0.2, 1],
+                                  }}
                                   className="overflow-hidden"
                                 >
                                   <div className="ml-2 space-y-0.5 border-l-2 border-[#895129]/15 pl-2 py-0.5">
                                     {item.children.map((child) => {
-                                      const ChildIcon = child.icon
+                                      const ChildIcon = child.icon;
                                       const childActive =
-                                        child.key === 'vendors_delivery_drivers'
-                                          ? location.pathname.startsWith('/admin/vendors/delivery-drivers')
-                                          : location.pathname === child.to
+                                        child.key === "vendors_delivery_drivers"
+                                          ? location.pathname.startsWith(
+                                              "/admin/vendors/delivery-drivers",
+                                            )
+                                          : location.pathname === child.to;
                                       return (
-                                        <motion.div key={child.key} whileHover={{ x: 3 }} transition={{ duration: 0.18 }}>
+                                        <motion.div
+                                          key={child.key}
+                                          whileHover={{ x: 3 }}
+                                          transition={{ duration: 0.18 }}
+                                        >
                                           <NavLink
                                             to={child.to}
-                                            onClick={() => isMobile && setMobileOpen(false)}
+                                            onClick={() =>
+                                              isMobile && setMobileOpen(false)
+                                            }
                                             className={cn(
-                                              'group relative flex items-center gap-2 rounded-lg px-2.5 py-2 text-[13px] font-medium tracking-tight text-muted-foreground transition-colors',
-                                              'hover:bg-[#895129]/5 hover:text-[#895129]',
+                                              "group relative flex items-center gap-2 rounded-lg px-2.5 py-2 text-[13px] font-medium tracking-tight text-muted-foreground transition-colors",
+                                              "hover:bg-[#895129]/5 hover:text-[#895129]",
                                               childActive &&
-                                                'bg-primary/10 text-[#895129] font-semibold shadow-[0_2px_8px_rgba(137,81,41,0.08)]',
+                                                "bg-primary/10 text-[#895129] font-semibold shadow-[0_2px_8px_rgba(137,81,41,0.08)]",
                                             )}
                                           >
                                             <span
                                               className={cn(
-                                                childActive ? 'text-[#895129]' : 'text-muted-foreground group-hover:text-[#895129]',
+                                                childActive
+                                                  ? "text-[#895129]"
+                                                  : "text-muted-foreground group-hover:text-[#895129]",
                                               )}
                                             >
                                               <ChildIcon className="h-3.5 w-3.5 shrink-0" />
@@ -466,14 +542,14 @@ export function AdminLayout() {
                                             <span>{child.label}</span>
                                           </NavLink>
                                         </motion.div>
-                                      )
+                                      );
                                     })}
                                   </div>
                                 </motion.div>
                               )}
                             </AnimatePresence>
                           </>
-                        )
+                        );
                       })()}
                     </div>
                   )}
@@ -482,29 +558,34 @@ export function AdminLayout() {
                   {sectionedMenu.products && (
                     <div className="space-y-1">
                       {(() => {
-                        const item = sectionedMenu.products
-                        const Icon = item.icon
+                        const item = sectionedMenu.products;
+                        const Icon = item.icon;
                         const isActive =
-                          location.pathname.startsWith('/admin/categories') ||
-                          location.pathname.startsWith('/products')
-                        const open = productsOpen && (!collapsed || isMobile)
+                          location.pathname.startsWith("/admin/categories") ||
+                          location.pathname.startsWith("/products");
+                        const open = productsOpen && (!collapsed || isMobile);
                         return (
                           <>
                             <button
                               type="button"
                               onClick={() => {
-                                const next = !productsOpen
-                                setProductsOpen(next)
-                                localStorage.setItem(PRODUCTS_OPEN_KEY, next ? '1' : '0')
+                                const next = !productsOpen;
+                                setProductsOpen(next);
+                                localStorage.setItem(
+                                  PRODUCTS_OPEN_KEY,
+                                  next ? "1" : "0",
+                                );
                               }}
                               className={cn(
-                                'group relative w-full flex items-center gap-3 rounded-xl border border-transparent px-3 py-2.5 text-sm font-medium tracking-tight text-muted-foreground transition-colors',
-                                'hover:bg-[#895129]/5 hover:text-[#895129]',
+                                "group relative w-full flex items-center gap-3 rounded-xl border border-transparent px-3 py-2.5 text-sm font-medium tracking-tight text-muted-foreground transition-colors",
+                                "hover:bg-[#895129]/5 hover:text-[#895129]",
                                 isActive &&
-                                  'bg-primary/10 text-[#895129] border-[#895129]/20 shadow-[0_4px_12px_rgba(137,81,41,0.12)] font-semibold',
-                                collapsed && !isMobile && 'justify-center px-2',
+                                  "bg-primary/10 text-[#895129] border-[#895129]/20 shadow-[0_4px_12px_rgba(137,81,41,0.12)] font-semibold",
+                                collapsed && !isMobile && "justify-center px-2",
                               )}
-                              title={collapsed && !isMobile ? item.label : undefined}
+                              title={
+                                collapsed && !isMobile ? item.label : undefined
+                              }
                               aria-expanded={open}
                             >
                               {isActive && (
@@ -513,62 +594,87 @@ export function AdminLayout() {
                                   className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-full bg-[#895129]"
                                 />
                               )}
-                              <motion.span whileHover={{ x: 4, scale: 1.01 }} className="flex items-center gap-3">
+                              <motion.span
+                                whileHover={{ x: 4, scale: 1.01 }}
+                                className="flex items-center gap-3"
+                              >
                                 <span
                                   className={cn(
-                                    isActive ? 'text-[#895129]' : 'text-muted-foreground group-hover:text-[#895129]',
+                                    isActive
+                                      ? "text-[#895129]"
+                                      : "text-muted-foreground group-hover:text-[#895129]",
                                   )}
                                 >
                                   <Icon className="h-4 w-4" />
                                 </span>
                                 {(!collapsed || isMobile) && (
                                   <>
-                                    <span className="flex-1 text-left">{item.label}</span>
+                                    <span className="flex-1 text-left">
+                                      {item.label}
+                                    </span>
                                     <ChevronDown
                                       className={cn(
-                                        'h-4 w-4 transition-transform duration-200',
-                                        open && 'rotate-180',
-                                        isActive && 'text-[#895129]',
+                                        "h-4 w-4 transition-transform duration-200",
+                                        open && "rotate-180",
+                                        isActive && "text-[#895129]",
                                       )}
                                     />
                                   </>
                                 )}
                               </motion.span>
-                              <SidebarTooltip label={item.label} collapsed={collapsed && !isMobile} />
+                              <SidebarTooltip
+                                label={item.label}
+                                collapsed={collapsed && !isMobile}
+                              />
                             </button>
 
                             <AnimatePresence initial={false}>
                               {open && (!collapsed || isMobile) && (
                                 <motion.div
                                   initial={{ height: 0, opacity: 0 }}
-                                  animate={{ height: 'auto', opacity: 1 }}
+                                  animate={{ height: "auto", opacity: 1 }}
                                   exit={{ height: 0, opacity: 0 }}
-                                  transition={{ duration: 0.24, ease: [0.4, 0, 0.2, 1] }}
+                                  transition={{
+                                    duration: 0.24,
+                                    ease: [0.4, 0, 0.2, 1],
+                                  }}
                                   className="overflow-hidden"
                                 >
                                   <div className="ml-2 space-y-0.5 border-l-2 border-[#895129]/15 pl-2 py-0.5">
                                     {item.children.map((child) => {
-                                      const ChildIcon = child.icon
+                                      const ChildIcon = child.icon;
                                       const childActive =
-                                        child.to === '/admin/categories'
-                                          ? location.pathname.startsWith('/admin/categories')
+                                        child.to === "/admin/categories"
+                                          ? location.pathname.startsWith(
+                                              "/admin/categories",
+                                            )
                                           : location.pathname === child.to ||
-                                            location.pathname.startsWith(`${child.to}/`)
+                                            location.pathname.startsWith(
+                                              `${child.to}/`,
+                                            );
                                       return (
-                                        <motion.div key={child.key} whileHover={{ x: 3 }} transition={{ duration: 0.18 }}>
+                                        <motion.div
+                                          key={child.key}
+                                          whileHover={{ x: 3 }}
+                                          transition={{ duration: 0.18 }}
+                                        >
                                           <NavLink
                                             to={child.to}
-                                            onClick={() => isMobile && setMobileOpen(false)}
+                                            onClick={() =>
+                                              isMobile && setMobileOpen(false)
+                                            }
                                             className={cn(
-                                              'group relative flex items-center gap-2 rounded-lg px-2.5 py-2 text-[13px] font-medium tracking-tight text-muted-foreground transition-colors',
-                                              'hover:bg-[#895129]/5 hover:text-[#895129]',
+                                              "group relative flex items-center gap-2 rounded-lg px-2.5 py-2 text-[13px] font-medium tracking-tight text-muted-foreground transition-colors",
+                                              "hover:bg-[#895129]/5 hover:text-[#895129]",
                                               childActive &&
-                                                'bg-primary/10 text-[#895129] font-semibold shadow-[0_2px_8px_rgba(137,81,41,0.08)]',
+                                                "bg-primary/10 text-[#895129] font-semibold shadow-[0_2px_8px_rgba(137,81,41,0.08)]",
                                             )}
                                           >
                                             <span
                                               className={cn(
-                                                childActive ? 'text-[#895129]' : 'text-muted-foreground group-hover:text-[#895129]',
+                                                childActive
+                                                  ? "text-[#895129]"
+                                                  : "text-muted-foreground group-hover:text-[#895129]",
                                               )}
                                             >
                                               <ChildIcon className="h-3.5 w-3.5 shrink-0" />
@@ -576,24 +682,24 @@ export function AdminLayout() {
                                             <span>{child.label}</span>
                                           </NavLink>
                                         </motion.div>
-                                      )
+                                      );
                                     })}
                                   </div>
                                 </motion.div>
                               )}
                             </AnimatePresence>
                           </>
-                        )
+                        );
                       })()}
                     </div>
                   )}
 
                   {sectionedMenu.managementLinks.map((item) => {
-                    const Icon = item.icon
+                    const Icon = item.icon;
                     const showDot =
-                      (item.key === 'support' && unreadByKind.support) ||
-                      (item.key === 'orders' && unreadByKind.orders) ||
-                      (item.key === 'delivery' && unreadByKind.delivery)
+                      (item.key === "support" && unreadByKind.support) ||
+                      (item.key === "orders" && unreadByKind.orders) ||
+                      (item.key === "delivery" && unreadByKind.delivery);
                     return (
                       <NavLink
                         key={item.key}
@@ -602,55 +708,66 @@ export function AdminLayout() {
                         className={({ isActive }) => {
                           const linkActive =
                             isActive ||
-                            (item.key === 'service_providers' &&
-                              location.pathname.startsWith('/admin/service-providers'))
+                            (item.key === "service_providers" &&
+                              location.pathname.startsWith(
+                                "/admin/service-providers",
+                              ));
                           return cn(
-                            'group relative flex items-center gap-3 rounded-xl border border-transparent px-3 py-2.5 text-sm font-medium tracking-tight text-muted-foreground transition-colors',
-                            'hover:bg-[#895129]/5 hover:text-[#895129]',
+                            "group relative flex items-center gap-3 rounded-xl border border-transparent px-3 py-2.5 text-sm font-medium tracking-tight text-muted-foreground transition-colors",
+                            "hover:bg-[#895129]/5 hover:text-[#895129]",
                             linkActive &&
-                              'bg-primary/10 text-[#895129] border-[#895129]/20 shadow-[0_4px_12px_rgba(137,81,41,0.12)] font-semibold',
-                            collapsed && !isMobile && 'justify-center px-2',
-                          )
+                              "bg-primary/10 text-[#895129] border-[#895129]/20 shadow-[0_4px_12px_rgba(137,81,41,0.12)] font-semibold",
+                            collapsed && !isMobile && "justify-center px-2",
+                          );
                         }}
                         title={collapsed && !isMobile ? item.label : undefined}
                       >
                         {({ isActive }) => {
                           const linkActive =
                             isActive ||
-                            (item.key === 'service_providers' &&
-                              location.pathname.startsWith('/admin/service-providers'))
+                            (item.key === "service_providers" &&
+                              location.pathname.startsWith(
+                                "/admin/service-providers",
+                              ));
                           return (
-                          <>
-                            {linkActive && (
+                            <>
+                              {linkActive && (
+                                <motion.span
+                                  layoutId="sidebar-active-indicator-main"
+                                  className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-full bg-[#895129]"
+                                />
+                              )}
                               <motion.span
-                                layoutId="sidebar-active-indicator-main"
-                                className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-full bg-[#895129]"
-                              />
-                            )}
-                            <motion.span
-                              whileHover={{ x: 4, scale: 1.01 }}
-                              className="flex items-center gap-3 group-hover:translate-x-1"
-                            >
-                              <motion.span
-                                whileHover={{ scale: 1.05 }}
-                                className={cn(
-                                  'relative',
-                                  linkActive ? 'text-[#895129]' : 'text-muted-foreground group-hover:text-[#895129]',
-                                )}
+                                whileHover={{ x: 4, scale: 1.01 }}
+                                className="flex items-center gap-3 group-hover:translate-x-1"
                               >
-                                <Icon className="h-4 w-4" />
-                                {showDot && (
-                                  <span className="absolute -right-1 -top-1 h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+                                <motion.span
+                                  whileHover={{ scale: 1.05 }}
+                                  className={cn(
+                                    "relative",
+                                    linkActive
+                                      ? "text-[#895129]"
+                                      : "text-muted-foreground group-hover:text-[#895129]",
+                                  )}
+                                >
+                                  <Icon className="h-4 w-4" />
+                                  {showDot && (
+                                    <span className="absolute -right-1 -top-1 h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+                                  )}
+                                </motion.span>
+                                {(!collapsed || isMobile) && (
+                                  <span>{item.label}</span>
                                 )}
                               </motion.span>
-                              {(!collapsed || isMobile) && <span>{item.label}</span>}
-                            </motion.span>
-                            <SidebarTooltip label={item.label} collapsed={collapsed && !isMobile} />
-                          </>
-                          )
+                              <SidebarTooltip
+                                label={item.label}
+                                collapsed={collapsed && !isMobile}
+                              />
+                            </>
+                          );
                         }}
                       </NavLink>
-                    )
+                    );
                   })}
                 </div>
               </div>
@@ -664,7 +781,7 @@ export function AdminLayout() {
                 )}
                 <div className="space-y-1">
                   {sectionedMenu.system.map((item) => {
-                    const Icon = item.icon
+                    const Icon = item.icon;
                     return (
                       <NavLink
                         key={item.key}
@@ -672,11 +789,11 @@ export function AdminLayout() {
                         onClick={() => isMobile && setMobileOpen(false)}
                         className={({ isActive }) =>
                           cn(
-                            'group relative flex items-center gap-3 rounded-xl border border-transparent px-3 py-2.5 text-sm font-medium tracking-tight text-muted-foreground transition-colors',
-                            'hover:bg-[#895129]/5 hover:text-[#895129]',
+                            "group relative flex items-center gap-3 rounded-xl border border-transparent px-3 py-2.5 text-sm font-medium tracking-tight text-muted-foreground transition-colors",
+                            "hover:bg-[#895129]/5 hover:text-[#895129]",
                             isActive &&
-                              'bg-primary/10 text-[#895129] border-[#895129]/20 shadow-[0_4px_12px_rgba(137,81,41,0.12)] font-semibold',
-                            collapsed && !isMobile && 'justify-center px-2',
+                              "bg-primary/10 text-[#895129] border-[#895129]/20 shadow-[0_4px_12px_rgba(137,81,41,0.12)] font-semibold",
+                            collapsed && !isMobile && "justify-center px-2",
                           )
                         }
                         title={collapsed && !isMobile ? item.label : undefined}
@@ -696,19 +813,26 @@ export function AdminLayout() {
                               <motion.span
                                 whileHover={{ scale: 1.05 }}
                                 className={cn(
-                                  'relative',
-                                  isActive ? 'text-[#895129]' : 'text-muted-foreground group-hover:text-[#895129]',
+                                  "relative",
+                                  isActive
+                                    ? "text-[#895129]"
+                                    : "text-muted-foreground group-hover:text-[#895129]",
                                 )}
                               >
                                 <Icon className="h-4 w-4" />
                               </motion.span>
-                              {(!collapsed || isMobile) && <span>{item.label}</span>}
+                              {(!collapsed || isMobile) && (
+                                <span>{item.label}</span>
+                              )}
                             </motion.span>
-                            <SidebarTooltip label={item.label} collapsed={collapsed && !isMobile} />
+                            <SidebarTooltip
+                              label={item.label}
+                              collapsed={collapsed && !isMobile}
+                            />
                           </>
                         )}
                       </NavLink>
-                    )
+                    );
                   })}
                 </div>
               </div>
@@ -723,27 +847,33 @@ export function AdminLayout() {
                   )}
                   <div className="space-y-1">
                     {(() => {
-                      const item = sectionedMenu.settings
-                      const Icon = item.icon
-                      const isActive = location.pathname.startsWith('/settings')
-                      const open = settingsOpen && (!collapsed || isMobile)
+                      const item = sectionedMenu.settings;
+                      const Icon = item.icon;
+                      const isActive =
+                        location.pathname.startsWith("/settings");
+                      const open = settingsOpen && (!collapsed || isMobile);
                       return (
                         <div className="space-y-1">
                           <button
                             type="button"
                             onClick={() => {
-                              const next = !settingsOpen
-                              setSettingsOpen(next)
-                              localStorage.setItem(SETTINGS_OPEN_KEY, next ? '1' : '0')
+                              const next = !settingsOpen;
+                              setSettingsOpen(next);
+                              localStorage.setItem(
+                                SETTINGS_OPEN_KEY,
+                                next ? "1" : "0",
+                              );
                             }}
                             className={cn(
-                              'group relative w-full flex items-center gap-3 rounded-xl border border-transparent px-3 py-2.5 text-sm font-medium tracking-tight text-muted-foreground transition-colors',
-                              'hover:bg-[#895129]/5 hover:text-[#895129]',
+                              "group relative w-full flex items-center gap-3 rounded-xl border border-transparent px-3 py-2.5 text-sm font-medium tracking-tight text-muted-foreground transition-colors",
+                              "hover:bg-[#895129]/5 hover:text-[#895129]",
                               isActive &&
-                                'bg-primary/10 text-[#895129] border-[#895129]/20 shadow-[0_4px_12px_rgba(137,81,41,0.12)] font-semibold',
-                              collapsed && !isMobile && 'justify-center px-2',
+                                "bg-primary/10 text-[#895129] border-[#895129]/20 shadow-[0_4px_12px_rgba(137,81,41,0.12)] font-semibold",
+                              collapsed && !isMobile && "justify-center px-2",
                             )}
-                            title={collapsed && !isMobile ? item.label : undefined}
+                            title={
+                              collapsed && !isMobile ? item.label : undefined
+                            }
                             aria-expanded={open}
                           >
                             {isActive && (
@@ -752,58 +882,77 @@ export function AdminLayout() {
                                 className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-full bg-[#895129]"
                               />
                             )}
-                          <motion.span whileHover={{ x: 4, scale: 1.01 }} className="flex items-center gap-3">
-                            <span
-                              className={cn(
-                                isActive ? 'text-[#895129]' : 'text-muted-foreground group-hover:text-[#895129]',
-                              )}
+                            <motion.span
+                              whileHover={{ x: 4, scale: 1.01 }}
+                              className="flex items-center gap-3"
                             >
-                              <Icon className="h-4 w-4" />
-                            </span>
+                              <span
+                                className={cn(
+                                  isActive
+                                    ? "text-[#895129]"
+                                    : "text-muted-foreground group-hover:text-[#895129]",
+                                )}
+                              >
+                                <Icon className="h-4 w-4" />
+                              </span>
                               {(!collapsed || isMobile) && (
                                 <>
-                                  <span className="flex-1 text-left">{item.label}</span>
-                                <ChevronDown
-                                  className={cn(
-                                    'h-4 w-4 transition-transform',
-                                    open && 'rotate-180',
-                                    isActive && 'text-[#895129]',
-                                  )}
-                                />
+                                  <span className="flex-1 text-left">
+                                    {item.label}
+                                  </span>
+                                  <ChevronDown
+                                    className={cn(
+                                      "h-4 w-4 transition-transform",
+                                      open && "rotate-180",
+                                      isActive && "text-[#895129]",
+                                    )}
+                                  />
                                 </>
                               )}
                             </motion.span>
-                            <SidebarTooltip label={item.label} collapsed={collapsed && !isMobile} />
+                            <SidebarTooltip
+                              label={item.label}
+                              collapsed={collapsed && !isMobile}
+                            />
                           </button>
 
                           <AnimatePresence initial={false}>
                             {open && (!collapsed || isMobile) && (
                               <motion.div
                                 initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: 'auto', opacity: 1 }}
+                                animate={{ height: "auto", opacity: 1 }}
                                 exit={{ height: 0, opacity: 0 }}
-                                transition={{ duration: 0.22, ease: 'easeOut' }}
+                                transition={{ duration: 0.22, ease: "easeOut" }}
                                 className="overflow-hidden"
                               >
                                 <div className="ml-2 space-y-0.5 border-l-2 border-[#895129]/15 pl-2 py-0.5">
                                   {item.children.map((child) => {
-                                    const ChildIcon = child.icon
-                                    const childActive = location.pathname === child.to
+                                    const ChildIcon = child.icon;
+                                    const childActive =
+                                      location.pathname === child.to;
                                     return (
-                                      <motion.div key={child.key} whileHover={{ x: 3 }} transition={{ duration: 0.18 }}>
+                                      <motion.div
+                                        key={child.key}
+                                        whileHover={{ x: 3 }}
+                                        transition={{ duration: 0.18 }}
+                                      >
                                         <NavLink
                                           to={child.to}
-                                          onClick={() => isMobile && setMobileOpen(false)}
+                                          onClick={() =>
+                                            isMobile && setMobileOpen(false)
+                                          }
                                           className={cn(
-                                            'group relative flex items-center gap-2 rounded-lg px-2.5 py-2 text-[13px] font-medium tracking-tight text-muted-foreground transition-colors',
-                                            'hover:bg-[#895129]/5 hover:text-[#895129]',
+                                            "group relative flex items-center gap-2 rounded-lg px-2.5 py-2 text-[13px] font-medium tracking-tight text-muted-foreground transition-colors",
+                                            "hover:bg-[#895129]/5 hover:text-[#895129]",
                                             childActive &&
-                                              'bg-primary/10 text-[#895129] font-semibold shadow-[0_2px_8px_rgba(137,81,41,0.08)]',
+                                              "bg-primary/10 text-[#895129] font-semibold shadow-[0_2px_8px_rgba(137,81,41,0.08)]",
                                           )}
                                         >
                                           <span
                                             className={cn(
-                                              childActive ? 'text-[#895129]' : 'text-muted-foreground group-hover:text-[#895129]',
+                                              childActive
+                                                ? "text-[#895129]"
+                                                : "text-muted-foreground group-hover:text-[#895129]",
                                             )}
                                           >
                                             <ChildIcon className="h-3.5 w-3.5 shrink-0" />
@@ -811,14 +960,14 @@ export function AdminLayout() {
                                           <span>{child.label}</span>
                                         </NavLink>
                                       </motion.div>
-                                    )
+                                    );
                                   })}
                                 </div>
                               </motion.div>
                             )}
                           </AnimatePresence>
                         </div>
-                      )
+                      );
                     })()}
                   </div>
                 </div>
@@ -835,24 +984,36 @@ export function AdminLayout() {
           >
             <div
               className={cn(
-                'flex items-center justify-between gap-3',
-                collapsed && !isMobile && 'justify-center',
+                "flex items-center justify-between gap-3",
+                collapsed && !isMobile && "justify-center",
               )}
             >
-              <div className={cn('flex items-center gap-3', collapsed && !isMobile && 'justify-center')}>
+              <div
+                className={cn(
+                  "flex items-center gap-3",
+                  collapsed && !isMobile && "justify-center",
+                )}
+              >
                 <Avatar className="h-9 w-9">
                   <AvatarFallback>AD</AvatarFallback>
                 </Avatar>
                 {(!collapsed || isMobile) && (
                   <div className="min-w-0">
-                    <div className="truncate text-sm font-semibold tracking-tight text-foreground">Admin</div>
-                    <div className="text-xs text-muted-foreground">Administrator</div>
+                    <div className="truncate text-sm font-semibold tracking-tight text-foreground">
+                      Admin
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Administrator
+                    </div>
                   </div>
                 )}
               </div>
 
               {(!collapsed || isMobile) && (
-                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                <motion.div
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                >
                   <Button
                     variant="destructive"
                     size="sm"
@@ -894,8 +1055,16 @@ export function AdminLayout() {
                 className="flex min-h-10 flex-wrap items-center gap-1 text-sm text-muted-foreground"
               >
                 {breadcrumbItems.map((crumb, i) => (
-                  <span key={`${crumb.label}-${i}`} className="inline-flex items-center gap-1">
-                    {i > 0 && <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground/50" aria-hidden />}
+                  <span
+                    key={`${crumb.label}-${i}`}
+                    className="inline-flex items-center gap-1"
+                  >
+                    {i > 0 && (
+                      <ChevronRight
+                        className="h-3.5 w-3.5 shrink-0 text-muted-foreground/50"
+                        aria-hidden
+                      />
+                    )}
                     {crumb.to && i < breadcrumbItems.length - 1 ? (
                       <Link
                         to={crumb.to}
@@ -906,7 +1075,8 @@ export function AdminLayout() {
                     ) : (
                       <span
                         className={cn(
-                          i === breadcrumbItems.length - 1 && 'font-medium text-foreground',
+                          i === breadcrumbItems.length - 1 &&
+                            "font-medium text-foreground",
                         )}
                       >
                         {crumb.label}
@@ -920,11 +1090,15 @@ export function AdminLayout() {
             <div className="flex items-center gap-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="icon" className="relative h-10 w-10">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="relative h-10 w-10"
+                  >
                     <Bell className="h-4 w-4" />
                     {unreadCount > 0 && (
                       <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-primary px-1 text-[10px] font-semibold text-white">
-                        {unreadCount > 99 ? '99+' : unreadCount}
+                        {unreadCount > 99 ? "99+" : unreadCount}
                       </span>
                     )}
                   </Button>
@@ -948,11 +1122,14 @@ export function AdminLayout() {
                       </div>
                     ) : (
                       notifications.slice(0, 12).map((n) => (
-                        <DropdownMenuItem key={n.id} className="items-start gap-2">
+                        <DropdownMenuItem
+                          key={n.id}
+                          className="items-start gap-2"
+                        >
                           <span
                             className={cn(
-                              'mt-1 h-2 w-2 rounded-full',
-                              n.read ? 'bg-black/10' : 'bg-primary',
+                              "mt-1 h-2 w-2 rounded-full",
+                              n.read ? "bg-black/10" : "bg-primary",
                             )}
                           />
                           <div className="flex flex-col gap-0.5">
@@ -987,9 +1164,7 @@ export function AdminLayout() {
                   <DropdownMenuItem>Profile</DropdownMenuItem>
                   <DropdownMenuItem>Settings</DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={handleLogout}
-                  >
+                  <DropdownMenuItem onClick={handleLogout}>
                     Logout
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -1014,6 +1189,5 @@ export function AdminLayout() {
         </main>
       </div>
     </div>
-  )
+  );
 }
-
