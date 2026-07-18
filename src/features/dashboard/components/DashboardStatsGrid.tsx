@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { animate, motion, useMotionValue, type Variants } from 'framer-motion'
 import { Link } from 'react-router-dom'
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 function CountUp({

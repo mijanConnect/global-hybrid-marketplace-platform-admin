@@ -3,7 +3,6 @@ import type { ProductRow } from '@/features/catalog/lib/mockProductsData'
 
 type ProductStatus = ProductRow['status']
 type ProductOwnerType = ProductRow['productOwnerType']
-
 type Props = {
   category: string | 'all'
   setCategory: (value: string | 'all') => void

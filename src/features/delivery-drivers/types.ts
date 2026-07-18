@@ -1,9 +1,6 @@
 export type DriverAccountStatus = 'active' | 'pending' | 'suspended' | 'blocked' | 'rejected'
-
 export type DriverLiveStatus = 'online' | 'offline' | 'delivering' | 'idle'
-
 export type VehicleType = 'Motorcycle' | 'Bicycle' | 'Car' | 'Van'
-
 export type DeliveryRowStatus = 'completed' | 'cancelled' | 'in_transit' | 'failed'
 
 export type DriverDocument = {
@@ -41,7 +38,6 @@ export type DriverDeliveryDetail = DriverDelivery & {
 }
 
 export type DocumentVerificationStatus = 'approved' | 'pending' | 'rejected'
-
 export type DocumentVerificationKind = 'nid' | 'passport' | 'license' | 'vehicle' | 'insurance' | 'profile'
 
 export type DocumentVerification = {

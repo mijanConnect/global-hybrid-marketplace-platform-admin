@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { io, type Socket } from 'socket.io-client'
 import { DollarSign, Download, ShoppingCart, Store, Users } from 'lucide-react'
-
 import { AnalyticsChartsSection } from '@/features/analytics/components/AnalyticsChartsSection'
 import { AnalyticsSummaryCards } from '@/features/analytics/components/AnalyticsSummaryCards'
 import { PageShell } from '@/components/PageShell'

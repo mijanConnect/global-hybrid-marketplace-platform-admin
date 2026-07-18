@@ -36,7 +36,6 @@ export default function HeroSection() {
     <PageShell title="Hero Section" description="Manage homepage hero content.">
       <div className="grid gap-6 lg:grid-cols-[420px_1fr]">
         {/* Form */}
-
         <Card className="border-[#EEE7DF] shadow-soft">
           <CardHeader>
             <CardTitle>Update Hero</CardTitle>

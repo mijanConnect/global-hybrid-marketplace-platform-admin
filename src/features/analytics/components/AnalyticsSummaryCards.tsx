@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion'
 import type { LucideIcon } from 'lucide-react'
-
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 

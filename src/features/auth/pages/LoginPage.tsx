@@ -100,7 +100,6 @@ export default function LoginPage() {
           type="submit"
           disabled={isLoading}
           className="w-full"
-          //   className="w-full bg-indigo-600 hover:bg-indigo-700"
         >
           {isLoading ? "Signing in..." : "Sign in"}
         </Button>

@@ -1,6 +1,5 @@
 import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, Mail, MapPin, Phone } from 'lucide-react'
-
 import { PageShell } from '@/components/PageShell'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'

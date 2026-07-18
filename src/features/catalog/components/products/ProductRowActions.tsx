@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion'
 import { Eye, Pencil, Trash2 } from 'lucide-react'
-
 import { Button } from '@/components/ui/button'
 import type { ProductRow } from '@/features/catalog/lib/mockProductsData'
 

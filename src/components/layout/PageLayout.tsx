@@ -1,5 +1,4 @@
 import type { PropsWithChildren, ReactNode } from 'react'
-
 import { cn } from '@/lib/utils'
 
 export function PageContainer({ className, children }: PropsWithChildren<{ className?: string }>) {

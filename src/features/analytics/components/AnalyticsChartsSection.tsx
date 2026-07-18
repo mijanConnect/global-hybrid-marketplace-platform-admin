@@ -12,7 +12,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 function Skeleton({ className }: { className?: string }) {

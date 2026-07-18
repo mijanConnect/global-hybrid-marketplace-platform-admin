@@ -5,7 +5,6 @@ import {
   RouterProvider,
   useParams,
 } from "react-router-dom";
-
 import { AdminLayout } from "@/layout/AdminLayout";
 import { AuthLayout } from "@/layout/AuthLayout";
 import { DeliveryDriverDetailsSkeleton } from "@/features/delivery-drivers/pages/DeliveryDriverDetailsSkeleton";
