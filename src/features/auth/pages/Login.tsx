@@ -2,35 +2,41 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useLoginMutation } from "@/services/authApi";
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [login, { isLoading }] = useLoginMutation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    setIsLoading(true);
 
     try {
-      // TODO: Replace with actual API call
       if (!email || !password) {
         setError("Please fill in all fields");
         return;
       }
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      const result = await login({ email, password }).unwrap();
+      
+      // Save token to localStorage
+      if (result.data?.accessToken) {
+        localStorage.setItem("admin_token", result.data.accessToken);
+      }
+      
+      // Save role if needed
+      if (result.data?.role) {
+        localStorage.setItem("admin_role", result.data.role);
+      }
 
       // Navigate to dashboard on success
       navigate("/");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
-    } finally {
-      setIsLoading(false);
+    } catch (err: any) {
+      setError(err?.data?.message || err?.message || "Invalid credentials or server error");
     }
   };
 

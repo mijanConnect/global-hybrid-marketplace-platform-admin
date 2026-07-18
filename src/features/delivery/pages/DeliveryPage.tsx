@@ -26,7 +26,7 @@ import {
 } from '@/components/ui/table'
 import type { AppNotification } from '@/app/notifications/notificationsSlice'
 import { markRead } from '@/app/notifications/notificationsSlice'
-import { useAppDispatch, useAppSelector } from '@/hooks/redux'
+import { useAppDispatch, useAppSelector } from '@/app/hooks'
 
 type DeliveryType = 'local' | 'international'
 type DeliveryStatus = 'pending' | 'picked_up' | 'in_transit' | 'delivered'

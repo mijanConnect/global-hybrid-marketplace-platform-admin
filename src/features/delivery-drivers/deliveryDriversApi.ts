@@ -1,4 +1,4 @@
-import { baseApi } from '@/app/api/baseApi'
+import { baseApi } from '@/services/baseApi'
 import { buildDriverDetail } from '@/features/delivery-drivers/buildDriverDetail'
 import {
   approveDriverRecord,

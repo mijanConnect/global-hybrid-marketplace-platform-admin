@@ -5,15 +5,17 @@ import {
   RouterProvider,
   useParams,
 } from "react-router-dom";
-import { AdminLayout } from "@/layout/AdminLayout";
-import { AuthLayout } from "@/layout/AuthLayout";
+import { AdminLayout } from "@/layouts/AdminLayout";
+import { AuthLayout } from "@/layouts/AuthLayout";
+import { PrivateRoute } from "@/routes/PrivateRoute";
+import { PublicRoute } from "@/routes/PublicRoute";
 import { DeliveryDriverDetailsSkeleton } from "@/features/delivery-drivers/pages/DeliveryDriverDetailsSkeleton";
 import HeroSection from "@/features/hero/HeroSection";
 
 const DashboardPage = lazy(
   () => import("@/features/dashboard/pages/DashboardPage"),
 );
-const LoginPage = lazy(() => import("@/features/auth/pages/LoginPage"));
+const LoginPage = lazy(() => import("@/features/auth/pages/Login"));
 const RegisterPage = lazy(() => import("@/features/auth/pages/RegisterPage"));
 const OtpVerifyPage = lazy(() => import("@/features/auth/pages/OtpVerifyPage"));
 const UpdatePasswordPage = lazy(
@@ -89,7 +91,11 @@ function LegacyDeliveryDriverDetailRedirect() {
 
 const router = createBrowserRouter([
   {
-    element: <AdminLayout />,
+    element: (
+      <PrivateRoute>
+        <AdminLayout />
+      </PrivateRoute>
+    ),
     children: [
       { path: "/", element: <DashboardPage /> },
       { path: "/users", element: <UsersPage /> },
@@ -142,7 +148,11 @@ const router = createBrowserRouter([
   },
   {
     path: "/auth",
-    element: <AuthLayout />,
+    element: (
+      <PublicRoute>
+        <AuthLayout />
+      </PublicRoute>
+    ),
     children: [
       { path: "login", element: <LoginPage /> },
       { path: "register", element: <RegisterPage /> },
@@ -152,22 +162,38 @@ const router = createBrowserRouter([
   },
   {
     path: "/login",
-    element: <AuthLayout />,
+    element: (
+      <PublicRoute>
+        <AuthLayout />
+      </PublicRoute>
+    ),
     children: [{ index: true, element: <LoginPage /> }],
   },
   {
     path: "/register",
-    element: <AuthLayout />,
+    element: (
+      <PublicRoute>
+        <AuthLayout />
+      </PublicRoute>
+    ),
     children: [{ index: true, element: <RegisterPage /> }],
   },
   {
     path: "/verify-otp",
-    element: <AuthLayout />,
+    element: (
+      <PublicRoute>
+        <AuthLayout />
+      </PublicRoute>
+    ),
     children: [{ index: true, element: <OtpVerifyPage /> }],
   },
   {
     path: "/update-password",
-    element: <AuthLayout />,
+    element: (
+      <PublicRoute>
+        <AuthLayout />
+      </PublicRoute>
+    ),
     children: [{ index: true, element: <UpdatePasswordPage /> }],
   },
   { path: "*", element: <NotFoundPage /> },

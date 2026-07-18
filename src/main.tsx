@@ -2,17 +2,13 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
-import { Provider } from 'react-redux'
-
-import { store } from '@/app/store'
-import { AdminSocketProvider } from '@/app/socket/AdminSocketProvider'
+import { AppProvider } from '@/app/provider'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <Provider store={store}>
-      <AdminSocketProvider>
-        <App />
-      </AdminSocketProvider>
-    </Provider>
+    <AppProvider>
+      <App />
+    </AppProvider>
   </StrictMode>,
 )
+

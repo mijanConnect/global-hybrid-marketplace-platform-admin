@@ -1,5 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit'
-import { baseApi } from '@/app/api/baseApi'
+import { baseApi } from '@/services/baseApi'
 import notificationsReducer from '@/app/notifications/notificationsSlice'
 
 export const store = configureStore({

@@ -57,7 +57,7 @@ import {
   useSuspendDriverMutation,
 } from '@/features/delivery-drivers/deliveryDriversApi'
 import type { DeliveryDriver } from '@/features/delivery-drivers/types'
-import { useAppDispatch } from '@/hooks/redux'
+import { useAppDispatch } from '@/app/hooks'
 import { pushNotification } from '@/app/notifications/notificationsSlice'
 import { cn } from '@/lib/utils'
 

@@ -1,4 +1,4 @@
-import { baseApi } from '@/app/api/baseApi'
+import { baseApi } from '@/services/baseApi'
 
 export type DashboardStatsResponse = {
   totals: {

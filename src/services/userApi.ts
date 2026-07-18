@@ -1,4 +1,4 @@
-import { baseApi } from '@/app/api/baseApi'
+import { baseApi } from '@/services/baseApi'
 
 export type UserRole = 'customer' | 'vendor' | 'driver'
 export type UserStatus = 'active' | 'blocked'

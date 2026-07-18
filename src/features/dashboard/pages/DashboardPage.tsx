@@ -1,11 +1,11 @@
 import { motion } from 'framer-motion'
-import type { DashboardStatsResponse } from '@/features/dashboard/dashboardApi'
+import type { DashboardStatsResponse } from '@/services/dashboardApi'
 import { DashboardCharts } from '@/features/dashboard/components/DashboardCharts'
 import {
   DashboardStatsGrid,
   type DashboardStatItem,
 } from '@/features/dashboard/components/DashboardStatsGrid'
-import { useGetDashboardStatsQuery } from '@/features/dashboard/dashboardApi'
+import { useGetDashboardStatsQuery } from '@/services/dashboardApi'
 import { PageShell } from '@/components/PageShell'
 
 function formatMoney(value: number) {

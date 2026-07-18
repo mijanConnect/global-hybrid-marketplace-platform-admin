@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import type { AppNotification } from '@/app/notifications/notificationsSlice'
 import { markRead } from '@/app/notifications/notificationsSlice'
-import { useAppDispatch, useAppSelector } from '@/hooks/redux'
+import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import { cn } from '@/lib/utils'
 
 type SupportRole = 'Customer' | 'Vendor' | 'Driver'

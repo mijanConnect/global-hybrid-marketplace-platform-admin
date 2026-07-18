@@ -16,7 +16,7 @@ import {
   PanelLeftOpen,
   Search,
 } from "lucide-react";
-import { adminMenu } from "@/layout/adminMenu";
+import { adminMenu } from "@/layouts/adminMenu";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -29,7 +29,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { useAppDispatch, useAppSelector } from "@/hooks/redux";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { markAllRead } from "@/app/notifications/notificationsSlice";
 const COLLAPSE_KEY = "admin_sidebar_collapsed";
 const SETTINGS_OPEN_KEY = "admin_sidebar_settings_open";

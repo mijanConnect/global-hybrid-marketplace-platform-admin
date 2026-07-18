@@ -26,7 +26,7 @@ import {
 } from '@/components/ui/table'
 import type { AppNotification } from '@/app/notifications/notificationsSlice'
 import { markRead } from '@/app/notifications/notificationsSlice'
-import { useAppDispatch, useAppSelector } from '@/hooks/redux'
+import { useAppDispatch, useAppSelector } from '@/app/hooks'
 
 type OrderType = 'product' | 'service'
 type PaymentStatus = 'paid' | 'pending' | 'failed' | 'cancelled'
