@@ -95,7 +95,7 @@ export default function LoginPage() {
         <div className="flex items-center justify-end text-sm">
           <button
             type="button"
-            onClick={() => navigate("/update-password")}
+            onClick={() => navigate("/forgot-password")}
             className="text-primary font-medium"
           >
             Forgot password?
@@ -110,16 +110,6 @@ export default function LoginPage() {
           {isLoading ? "Signing in..." : "Sign in"}
         </Button>
       </form>
-
-      <div className="text-center text-sm">
-        <span className="text-gray-600">Don't have an account? </span>
-        <button
-          onClick={() => navigate("/register")}
-          className="text-primary hover:text-primary/80 font-medium"
-        >
-          Sign up
-        </button>
-      </div>
     </div>
   );
 }

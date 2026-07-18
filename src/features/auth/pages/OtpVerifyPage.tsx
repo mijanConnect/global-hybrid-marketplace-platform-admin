@@ -1,20 +1,31 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useVerifyEmailMutation, useResendOtpMutation } from "@/services/authApi";
 
 export default function OtpVerifyPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const email = (location.state as { email?: string })?.email || "";
   const [otp, setOtp] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [countdown, setCountdown] = useState(60);
+  const [verifyEmail, { isLoading: isVerifying }] = useVerifyEmailMutation();
+  const [resendOtp, { isLoading: isResending }] = useResendOtpMutation();
+
+  useEffect(() => {
+    if (countdown > 0) {
+      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [countdown]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    setIsLoading(true);
+    setSuccess("");
 
     try {
       if (!otp) {
@@ -26,16 +37,34 @@ export default function OtpVerifyPage() {
         setError("OTP must be 6 digits");
         return;
       }
+      
+      const result = await verifyEmail({ email, oneTimeCode: parseInt(otp, 10) }).unwrap();
+      setSuccess(result.message || "OTP verified successfully");
+      
+      setTimeout(() => {
+        navigate("/update-password");
+      }, 1000);
+    } catch (err: any) {
+      setError(err?.data?.message || err?.message || "Invalid OTP");
+    }
+  };
 
-      // TODO: Replace with actual API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      // Navigate to dashboard or login
-      navigate("/login");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
-    } finally {
-      setIsLoading(false);
+  const handleResend = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
+    
+    if (!email) {
+      setError("Email address is missing");
+      return;
+    }
+    
+    try {
+      const result = await resendOtp({ email }).unwrap();
+      setSuccess(result.message || "OTP resent successfully");
+      setCountdown(60); // Reset countdown
+    } catch (err: any) {
+      setError(err?.data?.message || err?.message || "Failed to resend OTP");
     }
   };
 
@@ -51,6 +80,12 @@ export default function OtpVerifyPage() {
       {error && (
         <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
           {error}
+        </div>
+      )}
+
+      {success && (
+        <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-600">
+          {success}
         </div>
       )}
 
@@ -70,31 +105,35 @@ export default function OtpVerifyPage() {
             maxLength={6}
             value={otp}
             onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-            disabled={isLoading}
+            disabled={isVerifying}
             className="text-center text-2xl tracking-widest"
             required
           />
           <p className="mt-1 text-xs text-gray-500">6-digit code</p>
         </div>
 
-        <Button type="submit" disabled={isLoading} className="w-full">
-          {isLoading ? "Verifying..." : "Verify OTP"}
+        <Button type="submit" disabled={isVerifying} className="w-full">
+          {isVerifying ? "Verifying..." : "Verify OTP"}
         </Button>
       </form>
 
       <div className="text-center">
         <p className="text-sm text-gray-600 mb-2">Didn't receive the code?</p>
-        <a href="#" className="text-primary font-medium">
-          Resend OTP
-        </a>
+        <button 
+          onClick={handleResend}
+          disabled={isResending || countdown > 0}
+          className="text-primary font-medium hover:text-primary/80 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isResending ? "Resending..." : countdown > 0 ? `Resend OTP in ${countdown}s` : "Resend OTP"}
+        </button>
       </div>
 
       <div className="text-center text-sm">
         <button
-          onClick={() => navigate("/register")}
-          className="text-primary font-medium"
+          onClick={() => navigate("/login")}
+          className="text-primary font-medium hover:text-primary/80"
         >
-          Back to registration
+          Back to Login
         </button>
       </div>
     </div>

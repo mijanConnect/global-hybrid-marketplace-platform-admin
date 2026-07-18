@@ -16,10 +16,12 @@ const DashboardPage = lazy(
   () => import("@/features/dashboard/pages/DashboardPage"),
 );
 const LoginPage = lazy(() => import("@/features/auth/pages/Login"));
-const RegisterPage = lazy(() => import("@/features/auth/pages/RegisterPage"));
 const OtpVerifyPage = lazy(() => import("@/features/auth/pages/OtpVerifyPage"));
 const UpdatePasswordPage = lazy(
   () => import("@/features/auth/pages/UpdatePasswordPage"),
+);
+const ForgotPasswordPage = lazy(
+  () => import("@/features/auth/pages/ForgotPasswordPage"),
 );
 const UsersPage = lazy(() => import("@/features/users/pages/UsersPage"));
 const VendorsPage = lazy(() => import("@/features/vendors/pages/VendorsPage"));
@@ -70,12 +72,10 @@ const SettingsLegalPage = lazy(
 );
 const NotFoundPage = lazy(() => import("@/routes/NotFoundPage"));
 
+import { CustomSpinner } from "@/components/common/CustomSpinner";
+
 function Loading() {
-  return (
-    <div className="rounded-xl border border-[#EEE7DF] bg-white p-6 text-sm text-muted-foreground shadow-soft">
-      Loading…
-    </div>
-  );
+  return <CustomSpinner />;
 }
 
 function LegacyDeliveryDriverDetailRedirect() {
@@ -155,9 +155,9 @@ const router = createBrowserRouter([
     ),
     children: [
       { path: "login", element: <LoginPage /> },
-      { path: "register", element: <RegisterPage /> },
       { path: "verify-otp", element: <OtpVerifyPage /> },
       { path: "update-password", element: <UpdatePasswordPage /> },
+      { path: "forgot-password", element: <ForgotPasswordPage /> },
     ],
   },
   {
@@ -168,15 +168,6 @@ const router = createBrowserRouter([
       </PublicRoute>
     ),
     children: [{ index: true, element: <LoginPage /> }],
-  },
-  {
-    path: "/register",
-    element: (
-      <PublicRoute>
-        <AuthLayout />
-      </PublicRoute>
-    ),
-    children: [{ index: true, element: <RegisterPage /> }],
   },
   {
     path: "/verify-otp",
@@ -195,6 +186,15 @@ const router = createBrowserRouter([
       </PublicRoute>
     ),
     children: [{ index: true, element: <UpdatePasswordPage /> }],
+  },
+  {
+    path: "/forgot-password",
+    element: (
+      <PublicRoute>
+        <AuthLayout />
+      </PublicRoute>
+    ),
+    children: [{ index: true, element: <ForgotPasswordPage /> }],
   },
   { path: "*", element: <NotFoundPage /> },
 ]);
