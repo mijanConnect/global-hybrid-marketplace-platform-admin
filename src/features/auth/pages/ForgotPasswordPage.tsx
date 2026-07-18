@@ -26,8 +26,9 @@ export default function ForgotPasswordPage() {
       setTimeout(() => {
         navigate("/verify-otp", { state: { email } });
       }, 1500);
-    } catch (err: any) {
-      setError(err?.data?.message || err?.message || "Failed to process request");
+    } catch (err) {
+      const error = err as { data?: { message?: string }; message?: string };
+      setError(error?.data?.message || error?.message || "Failed to process request");
     }
   };
 

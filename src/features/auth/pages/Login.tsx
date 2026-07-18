@@ -35,8 +35,9 @@ export default function LoginPage() {
 
       // Navigate to dashboard on success
       navigate("/");
-    } catch (err: any) {
-      setError(err?.data?.message || err?.message || "Invalid credentials or server error");
+    } catch (err) {
+      const error = err as { data?: { message?: string }; message?: string };
+      setError(error?.data?.message || error?.message || "Invalid credentials or server error");
     }
   };
 

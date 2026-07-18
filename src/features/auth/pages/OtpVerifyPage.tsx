@@ -44,8 +44,9 @@ export default function OtpVerifyPage() {
       setTimeout(() => {
         navigate("/update-password");
       }, 1000);
-    } catch (err: any) {
-      setError(err?.data?.message || err?.message || "Invalid OTP");
+    } catch (err) {
+      const error = err as { data?: { message?: string }; message?: string };
+      setError(error?.data?.message || error?.message || "Invalid OTP");
     }
   };
 
@@ -63,8 +64,9 @@ export default function OtpVerifyPage() {
       const result = await resendOtp({ email }).unwrap();
       setSuccess(result.message || "OTP resent successfully");
       setCountdown(60); // Reset countdown
-    } catch (err: any) {
-      setError(err?.data?.message || err?.message || "Failed to resend OTP");
+    } catch (err) {
+      const error = err as { data?: { message?: string }; message?: string };
+      setError(error?.data?.message || error?.message || "Failed to resend OTP");
     }
   };
 

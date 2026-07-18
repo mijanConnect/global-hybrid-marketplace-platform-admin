@@ -72,9 +72,10 @@ export default function SettingsSecurityPage() {
       const result = await changePassword(form).unwrap();
       showToast(result.message || "Password changed successfully", "success");
       setForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
-    } catch (err: any) {
+    } catch (err) {
+      const error = err as { data?: { message?: string }; message?: string };
       showToast(
-        err?.data?.message || err?.message || "Failed to update password",
+        error?.data?.message || error?.message || "Failed to update password",
         "error",
       );
     }
