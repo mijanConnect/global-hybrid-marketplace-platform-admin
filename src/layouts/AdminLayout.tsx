@@ -17,7 +17,7 @@ import {
   Search,
 } from "lucide-react";
 import { adminMenu } from "@/layouts/adminMenu";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {

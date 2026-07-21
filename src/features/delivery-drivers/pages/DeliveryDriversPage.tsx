@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { AnimatePresence, motion } from 'framer-motion'
+import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   Ban,
   Bike,
@@ -12,11 +12,11 @@ import {
   ShieldAlert,
   User,
   XCircle,
-} from 'lucide-react'
-import { PageShell } from '@/components/PageShell'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+} from "lucide-react";
+import { PageShell } from "@/components/PageShell";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -24,7 +24,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,8 +32,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { Input } from '@/components/ui/input'
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -41,13 +41,13 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from "@/components/ui/table";
 import {
   AccountStatusBadge,
   LiveStatusBadge,
   StarRow,
   VehicleTypeBadge,
-} from '@/features/delivery-drivers/driverBadges'
+} from "@/features/delivery-drivers/driverBadges";
 import {
   useApproveDriverMutation,
   useBlockDriverMutation,
@@ -55,88 +55,94 @@ import {
   useMessageDriverMutation,
   useRejectDriverMutation,
   useSuspendDriverMutation,
-} from '@/features/delivery-drivers/deliveryDriversApi'
-import type { DeliveryDriver } from '@/features/delivery-drivers/types'
-import { useAppDispatch } from '@/app/hooks'
-import { pushNotification } from '@/app/notifications/notificationsSlice'
-import { cn } from '@/lib/utils'
+} from "@/features/delivery-drivers/deliveryDriversApi";
+import type { DeliveryDriver } from "@/features/delivery-drivers/types";
+import { useAppDispatch } from "@/app/hooks";
+import { pushNotification } from "@/app/notifications/notificationsSlice";
+import { cn } from "@/utils/utils";
 
 function formatMoney(value: number) {
-  return new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(value)
+  return new Intl.NumberFormat(undefined, {
+    style: "currency",
+    currency: "USD",
+  }).format(value);
 }
 
 function getInitials(name: string) {
-  const parts = name.trim().split(/\s+/).filter(Boolean)
-  const a = parts[0]?.[0] ?? ''
-  const b = parts[1]?.[0] ?? ''
-  return (a + b).toUpperCase()
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  const a = parts[0]?.[0] ?? "";
+  const b = parts[1]?.[0] ?? "";
+  return (a + b).toUpperCase();
 }
 
-const MotionTableRow = motion(TableRow)
-const MotionCard = motion(Card)
+const MotionTableRow = motion(TableRow);
+const MotionCard = motion(Card);
 
-type AccountFilter = DeliveryDriver['accountStatus'] | 'all'
-type PresenceFilter = DeliveryDriver['liveStatus'] | 'all'
-type VerifiedFilter = 'all' | 'verified' | 'unverified'
-type EarningsFilter = 'all' | 'lt5k' | '5to20k' | 'gt20k'
-type RatingFilter = 'all' | '45' | '4' | '35'
+type AccountFilter = DeliveryDriver["accountStatus"] | "all";
+type PresenceFilter = DeliveryDriver["liveStatus"] | "all";
+type VerifiedFilter = "all" | "verified" | "unverified";
+type EarningsFilter = "all" | "lt5k" | "5to20k" | "gt20k";
+type RatingFilter = "all" | "45" | "4" | "35";
 
 export default function DeliveryDriversPage() {
-  const navigate = useNavigate()
-  const dispatch = useAppDispatch()
-  const { data, isLoading, isFetching } = useGetDeliveryDriversOverviewQuery()
-  const [approve] = useApproveDriverMutation()
-  const [reject, { isLoading: rejecting }] = useRejectDriverMutation()
-  const [suspend] = useSuspendDriverMutation()
-  const [block] = useBlockDriverMutation()
-  const [message] = useMessageDriverMutation()
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const { data, isLoading, isFetching } = useGetDeliveryDriversOverviewQuery();
+  const [approve] = useApproveDriverMutation();
+  const [reject, { isLoading: rejecting }] = useRejectDriverMutation();
+  const [suspend] = useSuspendDriverMutation();
+  const [block] = useBlockDriverMutation();
+  const [message] = useMessageDriverMutation();
 
-  const [q, setQ] = useState('')
-  const [account, setAccount] = useState<AccountFilter>('all')
-  const [presence, setPresence] = useState<PresenceFilter>('all')
-  const [verified, setVerified] = useState<VerifiedFilter>('all')
-  const [country, setCountry] = useState<string | 'all'>('all')
-  const [earnings, setEarnings] = useState<EarningsFilter>('all')
-  const [rating, setRating] = useState<RatingFilter>('all')
+  const [q, setQ] = useState("");
+  const [account, setAccount] = useState<AccountFilter>("all");
+  const [presence, setPresence] = useState<PresenceFilter>("all");
+  const [verified, setVerified] = useState<VerifiedFilter>("all");
+  const [country, setCountry] = useState<string | "all">("all");
+  const [earnings, setEarnings] = useState<EarningsFilter>("all");
+  const [rating, setRating] = useState<RatingFilter>("all");
 
-  const [clickedId, setClickedId] = useState<string | null>(null)
+  const [clickedId, setClickedId] = useState<string | null>(null);
 
-  const [rejectOpen, setRejectOpen] = useState(false)
-  const [rejectTarget, setRejectTarget] = useState<DeliveryDriver | null>(null)
-  const [rejectReason, setRejectReason] = useState('')
+  const [rejectOpen, setRejectOpen] = useState(false);
+  const [rejectTarget, setRejectTarget] = useState<DeliveryDriver | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
 
-  const drivers = useMemo(() => data?.drivers ?? [], [data])
-  const stats = data?.stats
+  const drivers = useMemo(() => data?.drivers ?? [], [data]);
+  const stats = data?.stats;
 
   const countries = useMemo(() => {
-    const s = new Set(drivers.map((d) => d.country))
-    return Array.from(s).sort((a, b) => a.localeCompare(b))
-  }, [drivers])
+    const s = new Set(drivers.map((d) => d.country));
+    return Array.from(s).sort((a, b) => a.localeCompare(b));
+  }, [drivers]);
 
   const filtered = useMemo(() => {
-    const query = q.trim().toLowerCase()
+    const query = q.trim().toLowerCase();
     return drivers.filter((d) => {
       const matchesQ =
         query.length === 0 ||
         d.name.toLowerCase().includes(query) ||
         d.email.toLowerCase().includes(query) ||
         d.phone.toLowerCase().includes(query) ||
-        d.id.toLowerCase().includes(query)
-      const matchesAccount = account === 'all' || d.accountStatus === account
-      const matchesPresence = presence === 'all' || d.liveStatus === presence
+        d.id.toLowerCase().includes(query);
+      const matchesAccount = account === "all" || d.accountStatus === account;
+      const matchesPresence = presence === "all" || d.liveStatus === presence;
       const matchesVerified =
-        verified === 'all' || (verified === 'verified' ? d.verified : !d.verified)
-      const matchesCountry = country === 'all' || d.country === country
+        verified === "all" ||
+        (verified === "verified" ? d.verified : !d.verified);
+      const matchesCountry = country === "all" || d.country === country;
       const matchesEarnings =
-        earnings === 'all' ||
-        (earnings === 'lt5k' && d.totalEarnings < 5000) ||
-        (earnings === '5to20k' && d.totalEarnings >= 5000 && d.totalEarnings <= 20000) ||
-        (earnings === 'gt20k' && d.totalEarnings > 20000)
+        earnings === "all" ||
+        (earnings === "lt5k" && d.totalEarnings < 5000) ||
+        (earnings === "5to20k" &&
+          d.totalEarnings >= 5000 &&
+          d.totalEarnings <= 20000) ||
+        (earnings === "gt20k" && d.totalEarnings > 20000);
       const matchesRating =
-        rating === 'all' ||
-        (rating === '45' && d.rating >= 4.5) ||
-        (rating === '4' && d.rating >= 4.0) ||
-        (rating === '35' && d.rating > 0 && d.rating < 4.0)
+        rating === "all" ||
+        (rating === "45" && d.rating >= 4.5) ||
+        (rating === "4" && d.rating >= 4.0) ||
+        (rating === "35" && d.rating > 0 && d.rating < 4.0);
       return (
         matchesQ &&
         matchesAccount &&
@@ -145,31 +151,61 @@ export default function DeliveryDriversPage() {
         matchesCountry &&
         matchesEarnings &&
         matchesRating
-      )
-    })
-  }, [drivers, q, account, presence, verified, country, earnings, rating])
+      );
+    });
+  }, [drivers, q, account, presence, verified, country, earnings, rating]);
 
   const statCards = useMemo(() => {
-    if (!stats) return []
+    if (!stats) return [];
     return [
-      { key: 'total', label: 'Total drivers', value: stats.totalDrivers, icon: User },
-      { key: 'active', label: 'Active drivers', value: stats.activeDrivers, icon: CheckCircle2 },
-      { key: 'pending', label: 'Pending approvals', value: stats.pendingApprovals, icon: Package },
-      { key: 'online', label: 'Online drivers', value: stats.onlineDrivers, icon: Bike },
-      { key: 'today', label: 'Completed today', value: stats.completedDeliveriesToday, icon: Package },
-      { key: 'earn', label: 'Total driver earnings', value: formatMoney(stats.totalDriverEarnings), icon: CircleDollarSign },
-    ]
-  }, [stats])
+      {
+        key: "total",
+        label: "Total drivers",
+        value: stats.totalDrivers,
+        icon: User,
+      },
+      {
+        key: "active",
+        label: "Active drivers",
+        value: stats.activeDrivers,
+        icon: CheckCircle2,
+      },
+      {
+        key: "pending",
+        label: "Pending approvals",
+        value: stats.pendingApprovals,
+        icon: Package,
+      },
+      {
+        key: "online",
+        label: "Online drivers",
+        value: stats.onlineDrivers,
+        icon: Bike,
+      },
+      {
+        key: "today",
+        label: "Completed today",
+        value: stats.completedDeliveriesToday,
+        icon: Package,
+      },
+      {
+        key: "earn",
+        label: "Total driver earnings",
+        value: formatMoney(stats.totalDriverEarnings),
+        icon: CircleDollarSign,
+      },
+    ];
+  }, [stats]);
 
   async function handleMessageDriver(d: DeliveryDriver) {
-    await message({ id: d.id, name: d.name }).unwrap()
+    await message({ id: d.id, name: d.name }).unwrap();
     dispatch(
       pushNotification({
-        kind: 'message',
-        title: 'Message queued',
+        kind: "message",
+        title: "Message queued",
         description: `Thread with ${d.name} (demo).`,
       }),
-    )
+    );
   }
 
   return (
@@ -205,13 +241,18 @@ export default function DeliveryDriversPage() {
                   />
                 ))
               : statCards.map((c, i) => {
-                  const Icon = c.icon
+                  const Icon = c.icon;
                   return (
                     <motion.div
                       key={c.key}
                       initial={{ opacity: 0, y: 12 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: i * 0.06, type: 'spring', stiffness: 320, damping: 28 }}
+                      transition={{
+                        delay: i * 0.06,
+                        type: "spring",
+                        stiffness: 320,
+                        damping: 28,
+                      }}
                       whileHover={{ y: -3 }}
                     >
                       <Card className="group overflow-hidden rounded-xl border-[#EEE7DF] bg-linear-to-br from-white via-white to-primary/[0.06] shadow-soft transition-shadow hover:shadow-md">
@@ -224,17 +265,22 @@ export default function DeliveryDriversPage() {
                           </span>
                         </CardHeader>
                         <CardContent>
-                          <div className="text-2xl font-semibold tracking-tight text-foreground">{c.value}</div>
+                          <div className="text-2xl font-semibold tracking-tight text-foreground">
+                            {c.value}
+                          </div>
                           <div className="mt-2 h-1 w-12 rounded-full bg-primary/35" />
                         </CardContent>
                       </Card>
                     </motion.div>
-                  )
+                  );
                 })}
           </AnimatePresence>
         </div>
 
-        <MotionCard className="rounded-xl border-[#EEE7DF] shadow-soft" whileHover={{ boxShadow: '0 12px 36px rgba(16,24,40,0.08)' }}>
+        <MotionCard
+          className="rounded-xl border-[#EEE7DF] shadow-soft"
+          whileHover={{ boxShadow: "0 12px 36px rgba(16,24,40,0.08)" }}
+        >
           <CardHeader className="pb-3">
             <CardTitle className="text-base">Filters</CardTitle>
           </CardHeader>
@@ -304,7 +350,9 @@ export default function DeliveryDriversPage() {
               <option value="35">Below 4 stars</option>
             </select>
             {isFetching && !isLoading && (
-              <span className="text-xs font-medium text-primary">Refreshing…</span>
+              <span className="text-xs font-medium text-primary">
+                Refreshing…
+              </span>
             )}
           </CardContent>
         </MotionCard>
@@ -312,7 +360,9 @@ export default function DeliveryDriversPage() {
         <Card className="rounded-xl border-[#EEE7DF] shadow-soft">
           <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2 pb-3">
             <CardTitle className="text-base">Driver roster</CardTitle>
-            <div className="text-sm text-muted-foreground">{filtered.length} shown</div>
+            <div className="text-sm text-muted-foreground">
+              {filtered.length} shown
+            </div>
           </CardHeader>
           <CardContent className="p-0">
             <div className="hidden md:block">
@@ -328,13 +378,18 @@ export default function DeliveryDriversPage() {
                     <TableHead>Earnings</TableHead>
                     <TableHead>Live</TableHead>
                     <TableHead>Joined</TableHead>
-                    <TableHead className="min-w-40 pr-6 text-right">Actions</TableHead>
+                    <TableHead className="min-w-40 pr-6 text-right">
+                      Actions
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filtered.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={10} className="py-12 text-center text-sm text-muted-foreground">
+                      <TableCell
+                        colSpan={10}
+                        className="py-12 text-center text-sm text-muted-foreground"
+                      >
                         No drivers match your filters.
                       </TableCell>
                     </TableRow>
@@ -343,20 +398,31 @@ export default function DeliveryDriversPage() {
                       <MotionTableRow
                         key={d.id}
                         onClick={() => {
-                          setClickedId(d.id)
-                          navigate(`/admin/vendors/delivery-drivers/${encodeURIComponent(d.id)}`)
+                          setClickedId(d.id);
+                          navigate(
+                            `/admin/vendors/delivery-drivers/${encodeURIComponent(d.id)}`,
+                          );
                         }}
-                        className={cn('cursor-pointer', clickedId === d.id && 'bg-primary/[0.07]')}
+                        className={cn(
+                          "cursor-pointer",
+                          clickedId === d.id && "bg-primary/[0.07]",
+                        )}
                       >
                         <TableCell>
                           <div className="flex items-center gap-3">
                             <Avatar className="h-10 w-10 rounded-xl border border-[#EEE7DF]">
                               <AvatarImage src={d.avatarUrl} alt="" />
-                              <AvatarFallback>{getInitials(d.name)}</AvatarFallback>
+                              <AvatarFallback>
+                                {getInitials(d.name)}
+                              </AvatarFallback>
                             </Avatar>
                             <div className="min-w-0">
-                              <div className="truncate font-medium">{d.name}</div>
-                              <div className="truncate text-xs text-muted-foreground">{d.email}</div>
+                              <div className="truncate font-medium">
+                                {d.name}
+                              </div>
+                              <div className="truncate text-xs text-muted-foreground">
+                                {d.email}
+                              </div>
                             </div>
                           </div>
                         </TableCell>
@@ -368,15 +434,30 @@ export default function DeliveryDriversPage() {
                           <AccountStatusBadge status={d.accountStatus} />
                         </TableCell>
                         <TableCell>
-                          {d.ratingCount ? <StarRow rating={d.rating} /> : <span className="text-xs text-muted-foreground">—</span>}
+                          {d.ratingCount ? (
+                            <StarRow rating={d.rating} />
+                          ) : (
+                            <span className="text-xs text-muted-foreground">
+                              —
+                            </span>
+                          )}
                         </TableCell>
-                        <TableCell className="font-medium tabular-nums">{d.completedOrders.toLocaleString()}</TableCell>
-                        <TableCell className="tabular-nums text-sm">{formatMoney(d.totalEarnings)}</TableCell>
+                        <TableCell className="font-medium tabular-nums">
+                          {d.completedOrders.toLocaleString()}
+                        </TableCell>
+                        <TableCell className="tabular-nums text-sm">
+                          {formatMoney(d.totalEarnings)}
+                        </TableCell>
                         <TableCell>
                           <LiveStatusBadge status={d.liveStatus} />
                         </TableCell>
-                        <TableCell className="text-xs text-muted-foreground whitespace-nowrap">{d.joinDate}</TableCell>
-                        <TableCell className="min-w-40 pr-6 text-right" onClick={(e) => e.stopPropagation()}>
+                        <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
+                          {d.joinDate}
+                        </TableCell>
+                        <TableCell
+                          className="min-w-40 pr-6 text-right"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button
@@ -387,29 +468,36 @@ export default function DeliveryDriversPage() {
                                 <MoreHorizontal className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-52 rounded-xl">
+                            <DropdownMenuContent
+                              align="end"
+                              className="w-52 rounded-xl"
+                            >
                               <DropdownMenuLabel>Actions</DropdownMenuLabel>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem
                                 className="cursor-pointer"
-                                onClick={() => navigate(`/admin/vendors/delivery-drivers/${encodeURIComponent(d.id)}`)}
+                                onClick={() =>
+                                  navigate(
+                                    `/admin/vendors/delivery-drivers/${encodeURIComponent(d.id)}`,
+                                  )
+                                }
                               >
                                 <User className="h-4 w-4" />
                                 View details
                               </DropdownMenuItem>
-                              {d.accountStatus === 'pending' && (
+                              {d.accountStatus === "pending" && (
                                 <>
                                   <DropdownMenuItem
                                     className="cursor-pointer text-[#895129] focus:text-[#895129]"
                                     onClick={async () => {
-                                      await approve({ id: d.id }).unwrap()
+                                      await approve({ id: d.id }).unwrap();
                                       dispatch(
                                         pushNotification({
-                                          kind: 'system',
-                                          title: 'Driver approved',
+                                          kind: "system",
+                                          title: "Driver approved",
                                           description: d.name,
                                         }),
-                                      )
+                                      );
                                     }}
                                   >
                                     <CheckCircle2 className="h-4 w-4" />
@@ -418,8 +506,8 @@ export default function DeliveryDriversPage() {
                                   <DropdownMenuItem
                                     className="cursor-pointer text-red-600 focus:text-red-600"
                                     onClick={() => {
-                                      setRejectTarget(d)
-                                      setRejectOpen(true)
+                                      setRejectTarget(d);
+                                      setRejectOpen(true);
                                     }}
                                   >
                                     <XCircle className="h-4 w-4" />
@@ -427,20 +515,26 @@ export default function DeliveryDriversPage() {
                                   </DropdownMenuItem>
                                 </>
                               )}
-                              {d.accountStatus === 'active' && (
+                              {d.accountStatus === "active" && (
                                 <>
                                   <DropdownMenuItem
                                     className="cursor-pointer"
                                     onClick={() =>
-                                      navigate(`/admin/vendors/delivery-drivers/${encodeURIComponent(d.id)}`, {
-                                        state: { tab: 'deliveries' },
-                                      })
+                                      navigate(
+                                        `/admin/vendors/delivery-drivers/${encodeURIComponent(d.id)}`,
+                                        {
+                                          state: { tab: "deliveries" },
+                                        },
+                                      )
                                     }
                                   >
                                     <Package className="h-4 w-4" />
                                     View deliveries
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem className="cursor-pointer" onClick={() => handleMessageDriver(d)}>
+                                  <DropdownMenuItem
+                                    className="cursor-pointer"
+                                    onClick={() => handleMessageDriver(d)}
+                                  >
                                     <MessageSquare className="h-4 w-4" />
                                     Message driver
                                   </DropdownMenuItem>
@@ -448,14 +542,14 @@ export default function DeliveryDriversPage() {
                                   <DropdownMenuItem
                                     className="cursor-pointer text-amber-800 focus:text-amber-800"
                                     onClick={async () => {
-                                      await suspend({ id: d.id }).unwrap()
+                                      await suspend({ id: d.id }).unwrap();
                                       dispatch(
                                         pushNotification({
-                                          kind: 'system',
-                                          title: 'Driver suspended',
+                                          kind: "system",
+                                          title: "Driver suspended",
                                           description: d.name,
                                         }),
-                                      )
+                                      );
                                     }}
                                   >
                                     <ShieldAlert className="h-4 w-4" />
@@ -464,14 +558,14 @@ export default function DeliveryDriversPage() {
                                   <DropdownMenuItem
                                     className="cursor-pointer text-red-600 focus:text-red-600"
                                     onClick={async () => {
-                                      await block({ id: d.id }).unwrap()
+                                      await block({ id: d.id }).unwrap();
                                       dispatch(
                                         pushNotification({
-                                          kind: 'system',
-                                          title: 'Driver blocked',
+                                          kind: "system",
+                                          title: "Driver blocked",
                                           description: d.name,
                                         }),
-                                      )
+                                      );
                                     }}
                                   >
                                     <Ban className="h-4 w-4" />
@@ -491,20 +585,26 @@ export default function DeliveryDriversPage() {
 
             <div className="md:hidden divide-y divide-black/10">
               {filtered.length === 0 ? (
-                <div className="p-8 text-center text-sm text-muted-foreground">No drivers match your filters.</div>
+                <div className="p-8 text-center text-sm text-muted-foreground">
+                  No drivers match your filters.
+                </div>
               ) : null}
               {filtered.map((d) => (
                 <motion.button
                   key={d.id}
                   type="button"
                   onClick={() => {
-                    setClickedId(d.id)
-                    navigate(`/admin/vendors/delivery-drivers/${encodeURIComponent(d.id)}`)
+                    setClickedId(d.id);
+                    navigate(
+                      `/admin/vendors/delivery-drivers/${encodeURIComponent(d.id)}`,
+                    );
                   }}
                   whileTap={{ scale: 0.99 }}
                   className={cn(
-                    'flex w-full flex-col gap-3 p-4 text-left transition-colors',
-                    clickedId === d.id ? 'bg-primary/[0.07]' : 'bg-white hover:bg-black/2',
+                    "flex w-full flex-col gap-3 p-4 text-left transition-colors",
+                    clickedId === d.id
+                      ? "bg-primary/[0.07]"
+                      : "bg-white hover:bg-black/2",
                   )}
                 >
                   <div className="flex items-start justify-between gap-3">
@@ -515,7 +615,9 @@ export default function DeliveryDriversPage() {
                       </Avatar>
                       <div>
                         <div className="font-semibold">{d.name}</div>
-                        <div className="text-xs text-muted-foreground">{d.country}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {d.country}
+                        </div>
                       </div>
                     </div>
                     <LiveStatusBadge status={d.liveStatus} />
@@ -526,11 +628,17 @@ export default function DeliveryDriversPage() {
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-sm">
                     <div>
-                      <div className="text-xs text-muted-foreground">Earnings</div>
-                      <div className="font-medium">{formatMoney(d.totalEarnings)}</div>
+                      <div className="text-xs text-muted-foreground">
+                        Earnings
+                      </div>
+                      <div className="font-medium">
+                        {formatMoney(d.totalEarnings)}
+                      </div>
                     </div>
                     <div>
-                      <div className="text-xs text-muted-foreground">Completed</div>
+                      <div className="text-xs text-muted-foreground">
+                        Completed
+                      </div>
                       <div className="font-medium">{d.completedOrders}</div>
                     </div>
                   </div>
@@ -544,13 +652,15 @@ export default function DeliveryDriversPage() {
       <Dialog open={rejectOpen} onOpenChange={setRejectOpen}>
         <DialogContent className="rounded-xl">
           <DialogHeader>
-            <DialogTitle>Reject {rejectTarget?.name ?? 'driver'}?</DialogTitle>
-            <DialogDescription>Provide a clear reason — it is stored on the driver record (demo).</DialogDescription>
+            <DialogTitle>Reject {rejectTarget?.name ?? "driver"}?</DialogTitle>
+            <DialogDescription>
+              Provide a clear reason — it is stored on the driver record (demo).
+            </DialogDescription>
           </DialogHeader>
           <textarea
             className={cn(
-              'min-h-25 w-full rounded-xl border border-[#EEE7DF] bg-white px-3 py-2 text-sm',
-              'outline-none focus-visible:ring-2 focus-visible:ring-primary/30',
+              "min-h-25 w-full rounded-xl border border-[#EEE7DF] bg-white px-3 py-2 text-sm",
+              "outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
             )}
             placeholder="Reason for rejection…"
             value={rejectReason}
@@ -562,20 +672,25 @@ export default function DeliveryDriversPage() {
             </Button>
             <Button
               variant="destructive"
-              disabled={!rejectTarget || rejecting || rejectReason.trim().length < 4}
+              disabled={
+                !rejectTarget || rejecting || rejectReason.trim().length < 4
+              }
               onClick={async () => {
-                if (!rejectTarget) return
-                await reject({ id: rejectTarget.id, reason: rejectReason.trim() }).unwrap()
-                setRejectReason('')
-                setRejectOpen(false)
-                setRejectTarget(null)
+                if (!rejectTarget) return;
+                await reject({
+                  id: rejectTarget.id,
+                  reason: rejectReason.trim(),
+                }).unwrap();
+                setRejectReason("");
+                setRejectOpen(false);
+                setRejectTarget(null);
                 dispatch(
                   pushNotification({
-                    kind: 'system',
-                    title: 'Driver rejected',
+                    kind: "system",
+                    title: "Driver rejected",
                     description: rejectTarget.name,
                   }),
-                )
+                );
               }}
             >
               Reject driver
@@ -584,5 +699,5 @@ export default function DeliveryDriversPage() {
         </DialogContent>
       </Dialog>
     </PageShell>
-  )
+  );
 }

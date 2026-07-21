@@ -1,89 +1,93 @@
-import { useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { ImagePlus, Plus, Upload } from 'lucide-react'
+import { useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { ImagePlus, Plus, Upload } from "lucide-react";
 
-import { PageShell } from '@/components/PageShell'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { cn } from '@/lib/utils'
-import { loadCategories } from '@/features/catalog/lib/categoriesStorage'
+import { PageShell } from "@/components/PageShell";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/utils/utils";
+import { loadCategories } from "@/features/catalog/lib/categoriesStorage";
 
-type CountryMode = 'single' | 'multi'
+type CountryMode = "single" | "multi";
 
 type HighlightRow = {
-  id: string
-  key: string
-  value: string
-}
+  id: string;
+  key: string;
+  value: string;
+};
 
 export default function AddProductPage() {
-  const navigate = useNavigate()
-  const categories = useMemo(() => loadCategories().map((c) => c.name), [])
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const navigate = useNavigate();
+  const categories = useMemo(() => loadCategories().map((c) => c.name), []);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [name, setName] = useState('')
-  const [category, setCategory] = useState(categories[0] ?? 'General')
-  const [countryMode, setCountryMode] = useState<CountryMode>('single')
-  const [countryInput, setCountryInput] = useState('')
-  const [countries, setCountries] = useState<string[]>([])
-  const [price, setPrice] = useState('')
-  const [discount, setDiscount] = useState('')
-  const [stock, setStock] = useState('')
-  const [active, setActive] = useState(true)
-  const [images, setImages] = useState<string[]>([])
+  const [name, setName] = useState("");
+  const [category, setCategory] = useState(categories[0] ?? "General");
+  const [countryMode, setCountryMode] = useState<CountryMode>("single");
+  const [countryInput, setCountryInput] = useState("");
+  const [countries, setCountries] = useState<string[]>([]);
+  const [price, setPrice] = useState("");
+  const [discount, setDiscount] = useState("");
+  const [stock, setStock] = useState("");
+  const [active, setActive] = useState(true);
+  const [images, setImages] = useState<string[]>([]);
   const [highlights, setHighlights] = useState<HighlightRow[]>([
-    { id: 'hl-1', key: 'Color', value: 'Green' },
-    { id: 'hl-2', key: 'Material', value: 'Leather' },
-  ])
-  const [description, setDescription] = useState('')
-  const [details, setDetails] = useState('')
+    { id: "hl-1", key: "Color", value: "Green" },
+    { id: "hl-2", key: "Material", value: "Leather" },
+  ]);
+  const [description, setDescription] = useState("");
+  const [details, setDetails] = useState("");
 
   function addCountry() {
-    const value = countryInput.trim()
-    if (!value) return
+    const value = countryInput.trim();
+    if (!value) return;
     setCountries((prev) => {
-      if (countryMode === 'single') return [value]
-      if (prev.includes(value)) return prev
-      return [...prev, value]
-    })
-    setCountryInput('')
+      if (countryMode === "single") return [value];
+      if (prev.includes(value)) return prev;
+      return [...prev, value];
+    });
+    setCountryInput("");
   }
 
   function removeCountry(value: string) {
-    setCountries((prev) => prev.filter((c) => c !== value))
+    setCountries((prev) => prev.filter((c) => c !== value));
   }
 
   function addImages(files: FileList | null) {
-    if (!files?.length) return
-    const entries = Array.from(files).filter((f) => f.type.startsWith('image/'))
+    if (!files?.length) return;
+    const entries = Array.from(files).filter((f) =>
+      f.type.startsWith("image/"),
+    );
     entries.forEach((file) => {
-      const reader = new FileReader()
+      const reader = new FileReader();
       reader.onload = () => {
-        const result = typeof reader.result === 'string' ? reader.result : ''
-        if (!result) return
-        setImages((prev) => [...prev, result])
-      }
-      reader.readAsDataURL(file)
-    })
+        const result = typeof reader.result === "string" ? reader.result : "";
+        if (!result) return;
+        setImages((prev) => [...prev, result]);
+      };
+      reader.readAsDataURL(file);
+    });
   }
 
   function updateHighlight(id: string, patch: Partial<HighlightRow>) {
-    setHighlights((prev) => prev.map((h) => (h.id === id ? { ...h, ...patch } : h)))
+    setHighlights((prev) =>
+      prev.map((h) => (h.id === id ? { ...h, ...patch } : h)),
+    );
   }
 
   function addHighlight() {
-    const id = `hl-${Math.random().toString(36).slice(2, 8)}`
-    setHighlights((prev) => [...prev, { id, key: '', value: '' }])
+    const id = `hl-${Math.random().toString(36).slice(2, 8)}`;
+    setHighlights((prev) => [...prev, { id, key: "", value: "" }]);
   }
 
   function removeHighlight(id: string) {
-    setHighlights((prev) => prev.filter((h) => h.id !== id))
+    setHighlights((prev) => prev.filter((h) => h.id !== id));
   }
 
   function saveProduct() {
     // Layout-focused page: keeping action lightweight for now.
-    navigate('/products')
+    navigate("/products");
   }
 
   return (
@@ -92,7 +96,7 @@ export default function AddProductPage() {
       description="Create and publish a new product with pricing, media, and highlights."
       right={
         <div className="flex flex-wrap items-center gap-2">
-          <Button variant="outline" onClick={() => navigate('/products')}>
+          <Button variant="outline" onClick={() => navigate("/products")}>
             Cancel
           </Button>
           <Button onClick={saveProduct}>Save product</Button>
@@ -104,11 +108,17 @@ export default function AddProductPage() {
           <Card className="border-[#EEE7DF] shadow-soft">
             <CardHeader className="pb-3">
               <CardTitle className="text-base">Basic Info</CardTitle>
-              <p className="text-sm text-muted-foreground">Core details used across your store.</p>
+              <p className="text-sm text-muted-foreground">
+                Core details used across your store.
+              </p>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Product Name" />
+                <Input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Product Name"
+                />
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
@@ -128,18 +138,18 @@ export default function AddProductPage() {
                   <Button
                     type="button"
                     size="sm"
-                    variant={countryMode === 'single' ? 'default' : 'ghost'}
+                    variant={countryMode === "single" ? "default" : "ghost"}
                     className="h-8 rounded-lg px-3"
-                    onClick={() => setCountryMode('single')}
+                    onClick={() => setCountryMode("single")}
                   >
                     Single
                   </Button>
                   <Button
                     type="button"
                     size="sm"
-                    variant={countryMode === 'multi' ? 'default' : 'ghost'}
+                    variant={countryMode === "multi" ? "default" : "ghost"}
                     className="h-8 rounded-lg px-3"
-                    onClick={() => setCountryMode('multi')}
+                    onClick={() => setCountryMode("multi")}
                   >
                     Multi
                   </Button>
@@ -157,7 +167,9 @@ export default function AddProductPage() {
                 </div>
 
                 {countries.length === 0 ? (
-                  <p className="text-xs text-muted-foreground">No countries selected yet.</p>
+                  <p className="text-xs text-muted-foreground">
+                    No countries selected yet.
+                  </p>
                 ) : (
                   <div className="flex flex-wrap gap-2">
                     {countries.map((item) => (
@@ -176,7 +188,12 @@ export default function AddProductPage() {
               </div>
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <Input value={price} onChange={(e) => setPrice(e.target.value)} inputMode="numeric" placeholder="Price" />
+                <Input
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  inputMode="numeric"
+                  placeholder="Price"
+                />
                 <Input
                   value={discount}
                   onChange={(e) => setDiscount(e.target.value)}
@@ -201,8 +218,10 @@ export default function AddProductPage() {
                     aria-checked={active}
                     onClick={() => setActive((v) => !v)}
                     className={cn(
-                      'inline-flex h-6 w-11 items-center rounded-full p-0.5 transition-colors',
-                      active ? 'justify-end bg-primary' : 'justify-start bg-[#e7e5e4]',
+                      "inline-flex h-6 w-11 items-center rounded-full p-0.5 transition-colors",
+                      active
+                        ? "justify-end bg-primary"
+                        : "justify-start bg-[#e7e5e4]",
                     )}
                   >
                     <span className="h-5 w-5 rounded-full bg-white shadow-sm" />
@@ -216,9 +235,16 @@ export default function AddProductPage() {
             <CardHeader className="flex-row items-center justify-between space-y-0 pb-3">
               <div>
                 <CardTitle className="text-base">Product Images</CardTitle>
-                <p className="mt-1 text-sm text-muted-foreground">Upload multiple images. Pick a main image.</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Upload multiple images. Pick a main image.
+                </p>
               </div>
-              <Button variant="outline" size="sm" className="h-9" onClick={() => fileInputRef.current?.click()}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-9"
+                onClick={() => fileInputRef.current?.click()}
+              >
                 <Upload className="h-4 w-4" />
                 Upload
               </Button>
@@ -231,15 +257,16 @@ export default function AddProductPage() {
                 multiple
                 className="sr-only"
                 onChange={(e) => {
-                  addImages(e.target.files)
-                  e.currentTarget.value = ''
+                  addImages(e.target.files);
+                  e.currentTarget.value = "";
                 }}
               />
               <div
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') fileInputRef.current?.click()
+                  if (e.key === "Enter" || e.key === " ")
+                    fileInputRef.current?.click();
                 }}
                 onClick={() => fileInputRef.current?.click()}
                 className="grid min-h-52.5 place-items-center rounded-xl border border-dashed border-[#DCCBBC] bg-[#faf9f7] p-5 text-center"
@@ -249,21 +276,34 @@ export default function AddProductPage() {
                     <div className="mx-auto grid h-11 w-11 place-items-center rounded-xl border border-[#EEE7DF] bg-white">
                       <ImagePlus className="h-5 w-5 text-muted-foreground" />
                     </div>
-                    <p className="text-sm font-medium text-foreground">No images yet</p>
-                    <p className="text-xs text-muted-foreground">Upload at least one image for best results.</p>
+                    <p className="text-sm font-medium text-foreground">
+                      No images yet
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Upload at least one image for best results.
+                    </p>
                   </div>
                 ) : (
                   <div className="grid w-full grid-cols-3 gap-2">
                     {images.map((image, idx) => (
-                      <div key={`${image}-${idx}`} className="overflow-hidden rounded-lg border border-[#EEE7DF]">
-                        <img src={image} alt="" className="h-20 w-full object-cover" />
+                      <div
+                        key={`${image}-${idx}`}
+                        className="overflow-hidden rounded-lg border border-[#EEE7DF]"
+                      >
+                        <img
+                          src={image}
+                          alt=""
+                          className="h-20 w-full object-cover"
+                        />
                       </div>
                     ))}
                   </div>
                 )}
               </div>
               {images.length === 0 && (
-                <p className="text-xs font-medium text-red-600">At least 1 image is required.</p>
+                <p className="text-xs font-medium text-red-600">
+                  At least 1 image is required.
+                </p>
               )}
             </CardContent>
           </Card>
@@ -272,11 +312,15 @@ export default function AddProductPage() {
         <Card className="border-[#EEE7DF] shadow-soft">
           <CardHeader className="pb-3">
             <CardTitle className="text-base">Description</CardTitle>
-            <p className="text-sm text-muted-foreground">Write a short overview and optional bullet points.</p>
+            <p className="text-sm text-muted-foreground">
+              Write a short overview and optional bullet points.
+            </p>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-foreground">Description</label>
+              <label className="text-sm font-medium text-foreground">
+                Description
+              </label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
@@ -285,15 +329,22 @@ export default function AddProductPage() {
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-foreground">Product Details (bullets)</label>
+              <label className="text-sm font-medium text-foreground">
+                Product Details (bullets)
+              </label>
               <textarea
                 value={details}
                 onChange={(e) => setDetails(e.target.value)}
-                placeholder={'• Genuine leather\n• RFID blocking\n• Slim profile'}
+                placeholder={
+                  "• Genuine leather\n• RFID blocking\n• Slim profile"
+                }
                 className="h-24 w-full resize-none rounded-xl border border-[#89512930] bg-white p-3 text-sm placeholder:text-[#7c6a58] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#89512920]"
               />
             </div>
-            <p className="text-xs text-muted-foreground">One bullet per line. You can include &quot;*&quot; or &quot;-&quot;.</p>
+            <p className="text-xs text-muted-foreground">
+              One bullet per line. You can include &quot;*&quot; or
+              &quot;-&quot;.
+            </p>
           </CardContent>
         </Card>
 
@@ -305,25 +356,43 @@ export default function AddProductPage() {
                 Add key details like: Color → Green, Material → Leather
               </p>
             </div>
-            <Button type="button" variant="outline" size="sm" className="h-9" onClick={addHighlight}>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-9"
+              onClick={addHighlight}
+            >
               <Plus className="h-4 w-4" />
               Add Highlight
             </Button>
           </CardHeader>
           <CardContent className="space-y-2.5">
             {highlights.map((h) => (
-              <div key={h.id} className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_1fr_auto]">
+              <div
+                key={h.id}
+                className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_1fr_auto]"
+              >
                 <Input
                   placeholder="Key"
                   value={h.key}
-                  onChange={(e) => updateHighlight(h.id, { key: e.target.value })}
+                  onChange={(e) =>
+                    updateHighlight(h.id, { key: e.target.value })
+                  }
                 />
                 <Input
                   placeholder="Value"
                   value={h.value}
-                  onChange={(e) => updateHighlight(h.id, { value: e.target.value })}
+                  onChange={(e) =>
+                    updateHighlight(h.id, { value: e.target.value })
+                  }
                 />
-                <Button type="button" variant="ghost" size="sm" onClick={() => removeHighlight(h.id)}>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeHighlight(h.id)}
+                >
                   Remove
                 </Button>
               </div>
@@ -332,6 +401,5 @@ export default function AddProductPage() {
         </Card>
       </div>
     </PageShell>
-  )
+  );
 }
-
