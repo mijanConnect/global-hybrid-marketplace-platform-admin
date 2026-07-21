@@ -1,14 +1,18 @@
-import { baseApi } from '@/services/baseApi'
+import { baseApi } from "@/services/baseApi";
 
 export const authApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     login: build.mutation<
-      { success: boolean; message: string; data: { accessToken: string; role: string } },
+      {
+        success: boolean;
+        message: string;
+        data: { accessToken: string; role: string };
+      },
       { email: string; password: string }
     >({
       query: (credentials) => ({
-        url: '/auth/login',
-        method: 'POST',
+        url: "/auth/login",
+        method: "POST",
         body: credentials,
       }),
     }),
@@ -17,8 +21,8 @@ export const authApi = baseApi.injectEndpoints({
       { email: string }
     >({
       query: (data) => ({
-        url: '/auth/forget-password',
-        method: 'POST',
+        url: "/auth/forget-password",
+        method: "POST",
         body: data,
       }),
     }),
@@ -27,8 +31,8 @@ export const authApi = baseApi.injectEndpoints({
       { email: string; oneTimeCode: number }
     >({
       query: (data) => ({
-        url: '/auth/verify-email',
-        method: 'POST',
+        url: "/auth/verify-email",
+        method: "POST",
         body: data,
       }),
     }),
@@ -37,8 +41,8 @@ export const authApi = baseApi.injectEndpoints({
       { email: string }
     >({
       query: (data) => ({
-        url: '/auth/resend-otp',
-        method: 'POST',
+        url: "/auth/resend-otp",
+        method: "POST",
         body: data,
       }),
     }),
@@ -47,12 +51,18 @@ export const authApi = baseApi.injectEndpoints({
       { currentPassword: string; newPassword: string; confirmPassword: string }
     >({
       query: (data) => ({
-        url: '/auth/change-password',
-        method: 'POST',
+        url: "/auth/change-password",
+        method: "POST",
         body: data,
       }),
     }),
   }),
-})
+});
 
-export const { useLoginMutation, useForgotPasswordMutation, useVerifyEmailMutation, useResendOtpMutation, useChangePasswordMutation } = authApi
+export const {
+  useLoginMutation,
+  useForgotPasswordMutation,
+  useVerifyEmailMutation,
+  useResendOtpMutation,
+  useChangePasswordMutation,
+} = authApi;

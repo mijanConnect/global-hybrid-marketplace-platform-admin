@@ -2,7 +2,10 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useVerifyEmailMutation, useResendOtpMutation } from "@/services/authApi";
+import {
+  useVerifyEmailMutation,
+  useResendOtpMutation,
+} from "@/services/authApi";
 
 export default function OtpVerifyPage() {
   const navigate = useNavigate();
@@ -37,10 +40,13 @@ export default function OtpVerifyPage() {
         setError("OTP must be 6 digits");
         return;
       }
-      
-      const result = await verifyEmail({ email, oneTimeCode: parseInt(otp, 10) }).unwrap();
+
+      const result = await verifyEmail({
+        email,
+        oneTimeCode: parseInt(otp, 10),
+      }).unwrap();
       setSuccess(result.message || "OTP verified successfully");
-      
+
       setTimeout(() => {
         navigate("/update-password");
       }, 1000);
@@ -54,19 +60,21 @@ export default function OtpVerifyPage() {
     e.preventDefault();
     setError("");
     setSuccess("");
-    
+
     if (!email) {
       setError("Email address is missing");
       return;
     }
-    
+
     try {
       const result = await resendOtp({ email }).unwrap();
       setSuccess(result.message || "OTP resent successfully");
       setCountdown(60); // Reset countdown
     } catch (err) {
       const error = err as { data?: { message?: string }; message?: string };
-      setError(error?.data?.message || error?.message || "Failed to resend OTP");
+      setError(
+        error?.data?.message || error?.message || "Failed to resend OTP",
+      );
     }
   };
 
@@ -121,12 +129,16 @@ export default function OtpVerifyPage() {
 
       <div className="text-center">
         <p className="text-sm text-gray-600 mb-2">Didn't receive the code?</p>
-        <button 
+        <button
           onClick={handleResend}
           disabled={isResending || countdown > 0}
           className="text-primary font-medium hover:text-primary/80 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isResending ? "Resending..." : countdown > 0 ? `Resend OTP in ${countdown}s` : "Resend OTP"}
+          {isResending
+            ? "Resending..."
+            : countdown > 0
+              ? `Resend OTP in ${countdown}s`
+              : "Resend OTP"}
         </button>
       </div>
 
