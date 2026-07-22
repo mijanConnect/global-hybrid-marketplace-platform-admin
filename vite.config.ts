@@ -9,9 +9,8 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-
   server: {
-    host: true, // 👈 allows access from network (PC IP)
-    port: 5173, // optional
+    host: true,
+    port: 4005,
   },
 });
