@@ -7,7 +7,7 @@ export const disclaimerApi = baseApi.injectEndpoints({
     getDisclaimer: build.query<DisclaimerResponse, string>({
       query: (type) => ({ url: `/disclaimers/${type}`, method: "GET" }),
       providesTags: (_result, _error, arg) => [
-        { type: "Disclaimers" as any, id: arg },
+        { type: "Disclaimers", id: arg },
       ],
     }),
     updateDisclaimer: build.mutation<
@@ -20,7 +20,7 @@ export const disclaimerApi = baseApi.injectEndpoints({
         body,
       }),
       invalidatesTags: (_result, _error, { type }) => [
-        { type: "Disclaimers" as any, id: type },
+        { type: "Disclaimers", id: type },
       ],
     }),
   }),

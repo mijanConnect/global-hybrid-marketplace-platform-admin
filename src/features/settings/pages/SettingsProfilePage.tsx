@@ -51,6 +51,7 @@ export default function SettingsProfilePage() {
 
   useEffect(() => {
     if (profileData?.data) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setProfile({
         name: profileData.data.name || "",
         email: profileData.data.email || "",
@@ -73,7 +74,7 @@ export default function SettingsProfilePage() {
 
       await updateProfile(formData).unwrap();
       showToast("Profile updated");
-    } catch (error) {
+    } catch {
       showToast("Failed to update profile");
     }
   };

@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import type { DashboardStatsResponse } from '@/services/dashboardApi'
+import type { DashboardStatsResponse } from '@/types/dashboard'
 import { DashboardCharts } from '@/features/dashboard/components/DashboardCharts'
 import {
   DashboardStatsGrid,

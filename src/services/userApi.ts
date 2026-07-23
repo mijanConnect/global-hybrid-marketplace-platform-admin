@@ -30,10 +30,10 @@ export const usersApi = baseApi.injectEndpoints({
     }),
     getProfile: build.query<UserProfileResponse, void>({
       query: () => ({ url: "/users/profile", method: "GET" }),
-      providesTags: ["Profile" as any],
+      providesTags: ["Profile"],
     }),
     updateProfile: build.mutation<
-      { success: boolean; message: string; data: any },
+      UserProfileResponse,
       FormData
     >({
       query: (body) => ({
@@ -41,7 +41,7 @@ export const usersApi = baseApi.injectEndpoints({
         method: "PATCH",
         body,
       }),
-      invalidatesTags: ["Profile" as any],
+      invalidatesTags: ["Profile"],
     }),
   }),
 });
