@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Eye, Save, SendHorizonal } from "lucide-react";
 import { PageShell } from "@/components/PageShell";
@@ -16,6 +16,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { cn } from "@/utils/utils";
+import {
+  useGetDisclaimerQuery,
+  useUpdateDisclaimerMutation,
+} from "@/services/disclaimerApi";
 
 type DocKey = "terms" | "privacy";
 type PublishStatus = "published" | "draft";
@@ -136,6 +140,32 @@ export default function SettingsLegalPage() {
   const [docs, setDocs] = useState<Record<DocKey, LegalDoc>>(initialDocs);
   const [previewOpen, setPreviewOpen] = useState(false);
 
+  const apiTypeForTab =
+    tab === "terms" ? "terms-and-conditions" : "privacy-policy";
+  const { data: disclaimerData, isLoading } =
+    useGetDisclaimerQuery(apiTypeForTab);
+  const [updateDisclaimer, { isLoading: isUpdating }] =
+    useUpdateDisclaimerMutation();
+
+  useEffect(() => {
+    if (disclaimerData) {
+      // In case the API wraps the response in { success: true, data: ... } or returns an array
+      const rawData = (disclaimerData as any).data || disclaimerData;
+      const actualData = Array.isArray(rawData) ? rawData[0] : rawData;
+
+      if (actualData) {
+        setDocs((prev) => ({
+          ...prev,
+          [tab]: {
+            ...prev[tab],
+            content: actualData.content || "",
+            version: actualData.version || prev[tab].version,
+          },
+        }));
+      }
+    }
+  }, [disclaimerData, tab]);
+
   const current = docs[tab];
 
   const summary = useMemo(() => {
@@ -152,22 +182,35 @@ export default function SettingsLegalPage() {
     setDocs((prev) => ({ ...prev, [tab]: { ...prev[tab], ...patch } }));
   }
 
-  function saveChanges() {
-    const now = new Date();
-    const stamp = now.toLocaleString(undefined, {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-    patchCurrent({ lastUpdated: stamp, updatedBy: "Admin User" });
-    showToast("Changes saved");
+  async function saveChanges() {
+    try {
+      await updateDisclaimer({
+        type: apiTypeForTab,
+        body: {
+          type: apiTypeForTab,
+          content: current.content,
+          version: current.version,
+        },
+      }).unwrap();
+
+      const now = new Date();
+      const stamp = now.toLocaleString(undefined, {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      patchCurrent({ lastUpdated: stamp, updatedBy: "Admin User" });
+      showToast("Changes saved");
+    } catch (error) {
+      showToast("Failed to save changes");
+    }
   }
 
-  function publish() {
+  async function publish() {
     patchCurrent({ status: "published", visibility: "public" });
-    saveChanges();
+    await saveChanges();
     showToast("Document published");
   }
 
@@ -261,16 +304,17 @@ export default function SettingsLegalPage() {
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
                       <motion.div
-                        whileHover={{ scale: 1.03 }}
-                        whileTap={{ scale: 0.97 }}
+                        whileHover={isUpdating ? {} : { scale: 1.03 }}
+                        whileTap={isUpdating ? {} : { scale: 0.97 }}
                       >
                         <Button
                           variant="outline"
                           className="gap-2"
                           onClick={saveChanges}
+                          disabled={isUpdating}
                         >
                           <Save className="h-4 w-4" />
-                          Save Changes
+                          {isUpdating ? "Saving..." : "Save Changes"}
                         </Button>
                       </motion.div>
                       <motion.div
@@ -287,10 +331,14 @@ export default function SettingsLegalPage() {
                         </Button>
                       </motion.div>
                       <motion.div
-                        whileHover={{ scale: 1.03 }}
-                        whileTap={{ scale: 0.97 }}
+                        whileHover={isUpdating ? {} : { scale: 1.03 }}
+                        whileTap={isUpdating ? {} : { scale: 0.97 }}
                       >
-                        <Button className="gap-2" onClick={publish}>
+                        <Button
+                          className="gap-2"
+                          onClick={publish}
+                          disabled={isUpdating}
+                        >
                           <SendHorizonal className="h-4 w-4" />
                           Publish
                         </Button>
@@ -353,13 +401,19 @@ export default function SettingsLegalPage() {
                               <div className="mt-3 space-y-1">
                                 <div className="text-xs font-medium text-muted-foreground">
                                   Content
+                                  {isLoading && (
+                                    <span className="ml-2 text-primary">
+                                      Loading...
+                                    </span>
+                                  )}
                                 </div>
                                 <textarea
                                   value={current.content}
                                   onChange={(e) =>
                                     patchCurrent({ content: e.target.value })
                                   }
-                                  className="min-h-80 w-full resize-none rounded-xl border border-[#EEE7DF] bg-white p-3 text-sm leading-relaxed focus-visible:outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
+                                  disabled={isLoading}
+                                  className="min-h-80 w-full resize-none rounded-xl border border-[#EEE7DF] bg-white p-3 text-sm leading-relaxed focus-visible:outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 disabled:opacity-50"
                                 />
                               </div>
 

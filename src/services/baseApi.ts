@@ -23,6 +23,7 @@ export const baseApi = createApi({
     "Analytics",
     "DeliveryDrivers",
     "Profile",
+    "Disclaimers",
   ],
   endpoints: () => ({}),
 });
