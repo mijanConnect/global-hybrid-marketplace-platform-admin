@@ -27,6 +27,24 @@ export type GetUsersParams = {
   pageSize?: number;
 };
 
+export type UserProfileResponse = {
+  success: boolean;
+  message: string;
+  data: {
+    _id: string;
+    name: string;
+    role: string;
+    email: string;
+    phone: string;
+    profileImage: string;
+    coverImage: string;
+    about: string;
+    address: string;
+    status: string;
+    isVerified: boolean;
+  };
+};
+
 export const usersApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     getUsers: build.query<UsersListResponse, GetUsersParams>({
@@ -48,6 +66,21 @@ export const usersApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Users"],
     }),
+    getProfile: build.query<UserProfileResponse, void>({
+      query: () => ({ url: "/users/profile", method: "GET" }),
+      providesTags: ["Profile" as any],
+    }),
+    updateProfile: build.mutation<
+      { success: boolean; message: string; data: any },
+      FormData
+    >({
+      query: (body) => ({
+        url: "/users/profile",
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: ["Profile" as any],
+    }),
   }),
 });
 
@@ -55,4 +88,6 @@ export const {
   useGetUsersQuery,
   useBlockUserMutation,
   useChangeUserRoleMutation,
+  useGetProfileQuery,
+  useUpdateProfileMutation,
 } = usersApi;
