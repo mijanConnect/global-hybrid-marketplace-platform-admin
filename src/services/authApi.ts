@@ -1,55 +1,45 @@
 import { baseApi } from "@/services/baseApi";
+import type {
+  LoginRequest,
+  LoginResponse,
+  ForgotPasswordRequest,
+  VerifyEmailRequest,
+  ResendOtpRequest,
+  ChangePasswordRequest,
+  AuthSuccessResponse,
+} from "@/types/auth";
 
 export const authApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
-    login: build.mutation<
-      {
-        success: boolean;
-        message: string;
-        data: { accessToken: string; role: string };
-      },
-      { email: string; password: string }
-    >({
+    login: build.mutation<LoginResponse, LoginRequest>({
       query: (credentials) => ({
         url: "/auth/login",
         method: "POST",
         body: credentials,
       }),
     }),
-    forgotPassword: build.mutation<
-      { success: boolean; message: string },
-      { email: string }
-    >({
+    forgotPassword: build.mutation<AuthSuccessResponse, ForgotPasswordRequest>({
       query: (data) => ({
         url: "/auth/forget-password",
         method: "POST",
         body: data,
       }),
     }),
-    verifyEmail: build.mutation<
-      { success: boolean; message: string },
-      { email: string; oneTimeCode: number }
-    >({
+    verifyEmail: build.mutation<AuthSuccessResponse, VerifyEmailRequest>({
       query: (data) => ({
         url: "/auth/verify-email",
         method: "POST",
         body: data,
       }),
     }),
-    resendOtp: build.mutation<
-      { success: boolean; message: string },
-      { email: string }
-    >({
+    resendOtp: build.mutation<AuthSuccessResponse, ResendOtpRequest>({
       query: (data) => ({
         url: "/auth/resend-otp",
         method: "POST",
         body: data,
       }),
     }),
-    changePassword: build.mutation<
-      { success: boolean; message: string },
-      { currentPassword: string; newPassword: string; confirmPassword: string }
-    >({
+    changePassword: build.mutation<AuthSuccessResponse, ChangePasswordRequest>({
       query: (data) => ({
         url: "/auth/change-password",
         method: "POST",

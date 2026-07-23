@@ -1,10 +1,6 @@
 import { baseApi } from "@/services/baseApi";
 
-export type DisclaimerResponse = {
-  type: string;
-  content: string;
-  version?: string;
-};
+import type { DisclaimerResponse } from "@/types/disclaimer";
 
 export const disclaimerApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
