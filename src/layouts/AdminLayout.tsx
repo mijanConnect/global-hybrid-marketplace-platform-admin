@@ -123,8 +123,6 @@ export function AdminLayout() {
   const { data: profileResponse } = useGetProfileQuery();
   const userProfile = profileResponse?.data;
   const firstName = userProfile?.name?.split(" ")[0] || "Admin";
-  const fullName = userProfile?.name || "Admin";
-  const roleText = userProfile?.role?.replace(/_/g, " ") || "Administrator";
   const unreadCount = useMemo(
     () => notifications.filter((n) => !n.read).length,
     [notifications],
