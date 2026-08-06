@@ -17,7 +17,7 @@ import {
   Search,
 } from "lucide-react";
 import { adminMenu } from "@/layouts/adminMenu";
-import { cn } from "@/utils/utils";
+import { cn, getImageUrl } from "@/utils/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,9 +28,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { markAllRead } from "@/app/notifications/notificationsSlice";
+import { useGetProfileQuery } from "@/services/userApi";
 const COLLAPSE_KEY = "admin_sidebar_collapsed";
 const SETTINGS_OPEN_KEY = "admin_sidebar_settings_open";
 const VENDORS_OPEN_KEY = "admin_sidebar_vendors_open";
@@ -111,6 +120,11 @@ export function AdminLayout() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const notifications = useAppSelector((s) => s.notifications.items);
+  const { data: profileResponse } = useGetProfileQuery();
+  const userProfile = profileResponse?.data;
+  const firstName = userProfile?.name?.split(" ")[0] || "Admin";
+  const fullName = userProfile?.name || "Admin";
+  const roleText = userProfile?.role?.replace(/_/g, " ") || "Administrator";
   const unreadCount = useMemo(
     () => notifications.filter((n) => !n.read).length,
     [notifications],
@@ -124,7 +138,13 @@ export function AdminLayout() {
     };
   }, [notifications]);
 
+  const [logoutOpen, setLogoutOpen] = useState(false);
+
   const handleLogout = () => {
+    setLogoutOpen(true);
+  };
+
+  const confirmLogout = () => {
     localStorage.removeItem("admin_token");
     navigate("/login");
   };
@@ -982,49 +1002,28 @@ export function AdminLayout() {
             whileHover={{ y: -1 }}
             className="rounded-2xl border border-[#EEE7DF] bg-white/60 p-3 shadow-soft"
           >
-            <div
-              className={cn(
-                "flex items-center justify-between gap-3",
-                collapsed && !isMobile && "justify-center",
-              )}
-            >
-              <div
-                className={cn(
-                  "flex items-center gap-3",
-                  collapsed && !isMobile && "justify-center",
-                )}
+            <div className="flex justify-center">
+              <motion.div
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                className={!collapsed || isMobile ? "w-full" : ""}
               >
-                <Avatar className="h-9 w-9">
-                  <AvatarFallback>AD</AvatarFallback>
-                </Avatar>
-                {(!collapsed || isMobile) && (
-                  <div className="min-w-0">
-                    <div className="truncate text-sm font-semibold tracking-tight text-foreground">
-                      Admin
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      Administrator
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {(!collapsed || isMobile) && (
-                <motion.div
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className={cn(
+                    "h-9 px-3",
+                    (!collapsed || isMobile) && "w-full",
+                  )}
+                  onClick={handleLogout}
+                  title="Logout"
                 >
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    className="h-9 px-3"
-                    onClick={handleLogout}
-                  >
-                    <LogOut className="h-4 w-4" />
-                    Logout
-                  </Button>
-                </motion.div>
-              )}
+                  <LogOut className="h-4 w-4" />
+                  {(!collapsed || isMobile) && (
+                    <span className="ml-2">Logout</span>
+                  )}
+                </Button>
+              </motion.div>
             </div>
           </motion.div>
         </div>
@@ -1153,16 +1152,28 @@ export function AdminLayout() {
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="h-10 gap-2">
                     <Avatar className="h-7 w-7">
-                      <AvatarFallback>AD</AvatarFallback>
+                      <AvatarImage
+                        src={getImageUrl(userProfile?.profileImage)}
+                        alt={firstName}
+                        className="object-cover"
+                      />
+                      <AvatarFallback>
+                        {firstName.substring(0, 2).toUpperCase()}
+                      </AvatarFallback>
                     </Avatar>
-                    <span className="hidden sm:inline text-sm">Admin</span>
+                    <span className="hidden sm:inline text-sm">
+                      {firstName}
+                    </span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-44">
                   <DropdownMenuLabel>Account</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>Profile</DropdownMenuItem>
-                  <DropdownMenuItem>Settings</DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => navigate("/settings/profile")}
+                  >
+                    Profile
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout}>
                     Logout
@@ -1188,6 +1199,26 @@ export function AdminLayout() {
           </AnimatePresence>
         </main>
       </div>
+
+      <Dialog open={logoutOpen} onOpenChange={setLogoutOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Sign Out</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to sign out? You will need to log in again
+              to access the admin panel.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setLogoutOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={confirmLogout}>
+              Sign Out
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

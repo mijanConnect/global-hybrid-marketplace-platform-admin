@@ -1,5 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { Camera } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getImageUrl } from "@/utils/utils";
 import {
   useGetProfileQuery,
   useUpdateProfileMutation,
@@ -43,6 +46,10 @@ export default function SettingsProfilePage() {
   const { data: profileData, isLoading } = useGetProfileQuery();
   const [updateProfile, { isLoading: isUpdating }] = useUpdateProfileMutation();
 
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [profile, setProfile] = useState({
     name: "",
     email: "",
@@ -57,8 +64,11 @@ export default function SettingsProfilePage() {
         email: profileData.data.email || "",
         phone: profileData.data.phone || "",
       });
+      if (profileData.data.profileImage && !selectedImage) {
+        setImagePreview(profileData.data.profileImage);
+      }
     }
-  }, [profileData]);
+  }, [profileData, selectedImage]);
 
   function showToast(message: string) {
     const id = String(Date.now());
@@ -71,6 +81,9 @@ export default function SettingsProfilePage() {
       const formData = new FormData();
       formData.append("name", profile.name);
       formData.append("phone", profile.phone);
+      if (selectedImage) {
+        formData.append("profileImage", selectedImage);
+      }
 
       await updateProfile(formData).unwrap();
       showToast("Profile updated");
@@ -106,6 +119,46 @@ export default function SettingsProfilePage() {
               <CardTitle>Profile Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
+              <div className="mb-6 flex items-center gap-4">
+                <div className="relative">
+                  <Avatar className="h-20 w-20 border-2 border-white shadow-sm">
+                    <AvatarImage
+                      src={getImageUrl(imagePreview || undefined)}
+                      className="object-cover"
+                    />
+                    <AvatarFallback className="text-xl">
+                      {profile.name.substring(0, 2).toUpperCase() || "AD"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="absolute bottom-0 right-0 grid h-7 w-7 place-items-center rounded-full border border-[#EEE7DF] bg-white text-muted-foreground shadow-sm hover:text-foreground transition-colors"
+                  >
+                    <Camera className="h-4 w-4" />
+                  </button>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setSelectedImage(file);
+                        setImagePreview(URL.createObjectURL(file));
+                      }
+                    }}
+                  />
+                </div>
+                <div>
+                  <div className="text-sm font-medium">Profile Picture</div>
+                  <div className="text-xs text-muted-foreground">
+                    Click the camera icon to update your photo
+                  </div>
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 <div className="space-y-1">
                   <div className="text-sm font-medium">Admin name</div>

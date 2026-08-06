@@ -150,7 +150,8 @@ export default function SettingsLegalPage() {
   useEffect(() => {
     if (disclaimerData) {
       // In case the API wraps the response in { success: true, data: ... } or returns an array
-      const rawData = (disclaimerData as { data?: unknown }).data || disclaimerData;
+      const rawData =
+        (disclaimerData as { data?: unknown }).data || disclaimerData;
       const actualData = Array.isArray(rawData) ? rawData[0] : rawData;
 
       if (actualData) {
