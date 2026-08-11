@@ -1,6 +1,9 @@
 import { baseApi } from "@/services/baseApi";
 
-import type { DisclaimerResponse } from "@/types/disclaimer";
+import type {
+  DisclaimerResponse,
+  UpdateDisclaimerRequest,
+} from "@/types/disclaimer";
 
 export const disclaimerApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
@@ -12,15 +15,15 @@ export const disclaimerApi = baseApi.injectEndpoints({
     }),
     updateDisclaimer: build.mutation<
       DisclaimerResponse,
-      { type: string; body: Partial<DisclaimerResponse> }
+      { body: UpdateDisclaimerRequest }
     >({
       query: ({ body }) => ({
         url: `/disclaimers`,
         method: "POST",
         body,
       }),
-      invalidatesTags: (_result, _error, { type }) => [
-        { type: "Disclaimers", id: type },
+      invalidatesTags: (_result, _error, { body }) => [
+        { type: "Disclaimers", id: body.type },
       ],
     }),
   }),

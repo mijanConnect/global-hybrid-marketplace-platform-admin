@@ -142,31 +142,26 @@ export default function SettingsLegalPage() {
 
   const apiTypeForTab =
     tab === "terms" ? "terms-and-conditions" : "privacy-policy";
-  const { data: disclaimerData, isLoading } =
+  const { data: disclaimerResponse, isLoading } =
     useGetDisclaimerQuery(apiTypeForTab);
   const [updateDisclaimer, { isLoading: isUpdating }] =
     useUpdateDisclaimerMutation();
 
   useEffect(() => {
-    if (disclaimerData) {
-      // In case the API wraps the response in { success: true, data: ... } or returns an array
-      const rawData =
-        (disclaimerData as { data?: unknown }).data || disclaimerData;
-      const actualData = Array.isArray(rawData) ? rawData[0] : rawData;
+    if (disclaimerResponse?.success && disclaimerResponse.data) {
+      const actualData = disclaimerResponse.data;
 
-      if (actualData) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setDocs((prev) => ({
-          ...prev,
-          [tab]: {
-            ...prev[tab],
-            content: actualData.content || "",
-            version: actualData.version || prev[tab].version,
-          },
-        }));
-      }
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setDocs((prev) => ({
+        ...prev,
+        [tab]: {
+          ...prev[tab],
+          content: actualData.content || "",
+          version: actualData.version || prev[tab].version,
+        },
+      }));
     }
-  }, [disclaimerData, tab]);
+  }, [disclaimerResponse, tab]);
 
   const current = docs[tab];
 
@@ -187,7 +182,6 @@ export default function SettingsLegalPage() {
   async function saveChanges() {
     try {
       await updateDisclaimer({
-        type: apiTypeForTab,
         body: {
           type: apiTypeForTab,
           content: current.content,
