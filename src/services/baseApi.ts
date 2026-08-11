@@ -22,6 +22,7 @@ export const baseApi = createApi({
     "Payouts",
     "Analytics",
     "DeliveryDrivers",
+    "Deliveries",
     "Profile",
     "Disclaimers",
     "ServiceProviders",
