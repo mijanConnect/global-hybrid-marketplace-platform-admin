@@ -150,7 +150,7 @@ export default function DeliveryPage() {
     latestDeliveryNotification.id !== dismissedToastId &&
     !latestDeliveryNotification.read;
 
-  function assignDriverTo(deliveryId: string, driverName: string) {
+  function assignDriverTo() {
     // Implement API call for driver assignment if available
     setAssignTargetId(null);
   }
@@ -538,7 +538,7 @@ export default function DeliveryPage() {
                 <Button
                   className="bg-primary text-white hover:bg-primary/90"
                   onClick={() => {
-                    assignDriverTo(assignTargetId, selectedDriver);
+                    assignDriverTo();
                   }}
                 >
                   Confirm assign

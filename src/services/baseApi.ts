@@ -20,6 +20,7 @@ export const baseApi = createApi({
     "Services",
     "Orders",
     "Payouts",
+    "WithdrawRequests",
     "Analytics",
     "DeliveryDrivers",
     "Deliveries",

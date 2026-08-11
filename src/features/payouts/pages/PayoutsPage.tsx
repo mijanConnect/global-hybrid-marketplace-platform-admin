@@ -1,10 +1,10 @@
-import { useMemo, useState } from 'react'
-import { motion } from 'framer-motion'
-import { AlertTriangle, ChevronDown, Eye, ShieldAlert } from 'lucide-react'
-import { PageShell } from '@/components/PageShell'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useMemo, useState } from "react";
+import { motion } from "framer-motion";
+import { ChevronDown, Eye, ShieldAlert } from "lucide-react";
+import { PageShell } from "@/components/PageShell";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -12,9 +12,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table,
   TableBody,
@@ -22,198 +22,178 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from "@/components/ui/table";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+} from "@/components/ui/dropdown-menu";
 
-type PayoutStatus = 'pending' | 'approved' | 'flagged' | 'hold'
-
-type PayoutRow = {
-  id: string
-  vendor: string
-  vendorCountry: string
-  vendorTotalEarnings: number
-  amount: number
-  status: PayoutStatus
-  method: 'Stripe'
-  requestDate: string // YYYY-MM-DD
-  orders: number
-  ordersBreakdown: Array<{ id: string; amount: number }>
-  refundRatio: number // 0..1
-  suspiciousVendor: boolean
-}
-
-const mockPayouts: PayoutRow[] = [
-  {
-    id: 'PAY-1001',
-    vendor: 'Cedar & Co',
-    vendorCountry: 'US',
-    vendorTotalEarnings: 6200,
-    amount: 250,
-    status: 'pending',
-    method: 'Stripe',
-    requestDate: '2026-04-20',
-    orders: 5,
-    ordersBreakdown: [
-      { id: '#28901', amount: 78.25 },
-      { id: '#28877', amount: 49.5 },
-      { id: '#28812', amount: 36.0 },
-      { id: '#28744', amount: 42.0 },
-      { id: '#28690', amount: 44.25 },
-    ],
-    refundRatio: 0.06,
-    suspiciousVendor: false,
-  },
-  {
-    id: 'PAY-1002',
-    vendor: 'Brown Barrel Foods',
-    vendorCountry: 'BD',
-    vendorTotalEarnings: 12400,
-    amount: 540,
-    status: 'approved',
-    method: 'Stripe',
-    requestDate: '2026-04-18',
-    orders: 12,
-    ordersBreakdown: Array.from({ length: 12 }).map((_, i) => ({
-      id: `#287${10 + i}`,
-      amount: Math.round((20 + Math.random() * 80) * 100) / 100,
-    })),
-    refundRatio: 0.11,
-    suspiciousVendor: false,
-  },
-  {
-    id: 'PAY-1003',
-    vendor: 'Golden Grain',
-    vendorCountry: 'AE',
-    vendorTotalEarnings: 3100,
-    amount: 120,
-    status: 'flagged',
-    method: 'Stripe',
-    requestDate: '2026-04-22',
-    orders: 3,
-    ordersBreakdown: [
-      { id: '#28992', amount: 29.5 },
-      { id: '#28964', amount: 42.25 },
-      { id: '#28910', amount: 48.25 },
-    ],
-    refundRatio: 0.34,
-    suspiciousVendor: true,
-  },
-]
+import {
+  useGetWithdrawRequestsQuery,
+  useUpdateWithdrawRequestStatusMutation,
+} from "@/services/withdrawRequestsApi";
+import type {
+  WithdrawRequest,
+  WithdrawRequestStatus,
+} from "@/types/withdrawRequest";
 
 function formatMoney(value: number) {
-  return new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(value)
+  return new Intl.NumberFormat(undefined, {
+    style: "currency",
+    currency: "USD",
+  }).format(value);
 }
 
-function StatusBadge({ status }: { status: PayoutStatus }) {
-  if (status === 'approved') {
-    return <Badge className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700">approved</Badge>
+function StatusBadge({ status }: { status: WithdrawRequestStatus | string }) {
+  if (status === "approved") {
+    return (
+      <Badge className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700">
+        approved
+      </Badge>
+    );
   }
-  if (status === 'flagged') {
-    return <Badge className="rounded-full border border-red-200 bg-red-50 px-2.5 py-0.5 text-xs font-medium text-red-700">flagged</Badge>
+  if (status === "flagged") {
+    return (
+      <Badge className="rounded-full border border-red-200 bg-red-50 px-2.5 py-0.5 text-xs font-medium text-red-700">
+        flagged
+      </Badge>
+    );
   }
-  if (status === 'hold') {
-    return <Badge className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700">hold</Badge>
+  if (status === "hold") {
+    return (
+      <Badge className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700">
+        hold
+      </Badge>
+    );
   }
-  return <Badge className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700">pending</Badge>
+  if (status === "rejected") {
+    return (
+      <Badge className="rounded-full border border-red-200 bg-red-50 px-2.5 py-0.5 text-xs font-medium text-red-700">
+        rejected
+      </Badge>
+    );
+  }
+  return (
+    <Badge className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700">
+      pending
+    </Badge>
+  );
 }
 
-const MotionTableRow = motion(TableRow)
+const MotionTableRow = motion(TableRow);
 
 export default function PayoutsPage() {
-  const [payouts, setPayouts] = useState<PayoutRow[]>(mockPayouts)
-  const [selected, setSelected] = useState<PayoutRow | null>(null)
+  const [selected, setSelected] = useState<WithdrawRequest | null>(null);
 
-  const [tab, setTab] = useState<'all' | 'pending' | 'approved' | 'flagged'>('all')
-  const [q, setQ] = useState('')
-  const [status, setStatus] = useState<PayoutStatus | 'all'>('all')
-  const [fromDate, setFromDate] = useState('')
-  const [toDate, setToDate] = useState('')
-  const [minAmount, setMinAmount] = useState('')
-  const [maxAmount, setMaxAmount] = useState('')
+  const [tab, setTab] = useState<"all" | "pending" | "approved" | "flagged">(
+    "all",
+  );
+  const [q, setQ] = useState("");
+  const [status, setStatus] = useState<WithdrawRequestStatus | "all">("all");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+  const [minAmount, setMinAmount] = useState("");
+  const [maxAmount, setMaxAmount] = useState("");
 
-  const [page, setPage] = useState(1)
-  const pageSize = 10
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
 
-  const commissionRate = 0.1
+  const queryParams = useMemo(
+    () => ({
+      page,
+      limit: pageSize,
+      searchTerm: q || undefined,
+      status: tab !== "all" ? tab : status === "all" ? undefined : status,
+    }),
+    [page, q, status, tab],
+  );
+
+  const { data: response, isFetching } =
+    useGetWithdrawRequestsQuery(queryParams);
+  const [updateStatus] = useUpdateWithdrawRequestStatusMutation();
+
+  const withdrawRequests = response?.data || [];
+  const pagination = response?.pagination;
+  const totalPages = pagination?.totalPage || 1;
+
+  const commissionRate = 0.1;
 
   const summary = useMemo(() => {
-    const totalRevenue = payouts.reduce((sum, p) => sum + p.ordersBreakdown.reduce((s, o) => s + o.amount, 0), 0)
-    const totalPayouts = payouts
-      .filter((p) => p.status === 'approved')
-      .reduce((sum, p) => sum + p.amount, 0)
-    const pendingPayouts = payouts
-      .filter((p) => p.status === 'pending' || p.status === 'hold')
-      .reduce((sum, p) => sum + p.amount, 0)
-    const platformEarnings = totalRevenue * commissionRate
-    return { totalRevenue, totalPayouts, pendingPayouts, platformEarnings }
-  }, [payouts])
+    // These are simplified calculations as the new endpoint does not provide aggregated stats.
+    const totalPayouts = withdrawRequests
+      .filter((p) => p.status === "approved")
+      .reduce((sum, p) => sum + p.amount, 0);
+    const pendingPayouts = withdrawRequests
+      .filter((p) => p.status === "pending" || p.status === "hold")
+      .reduce((sum, p) => sum + p.amount, 0);
+
+    // Total Revenue is mocked as we don't have it from this endpoint
+    const totalRevenue = totalPayouts / (1 - commissionRate);
+    const platformEarnings = totalRevenue * commissionRate;
+    return { totalRevenue, totalPayouts, pendingPayouts, platformEarnings };
+  }, [withdrawRequests]);
 
   const insights = useMemo(() => {
-    const topVendors = [...payouts]
-      .sort((a, b) => b.vendorTotalEarnings - a.vendorTotalEarnings)
-      .slice(0, 3)
-    const highestPayouts = [...payouts].sort((a, b) => b.amount - a.amount).slice(0, 3)
-    const recent = [...payouts].sort((a, b) => (a.requestDate < b.requestDate ? 1 : -1)).slice(0, 5)
-    return { topVendors, highestPayouts, recent }
-  }, [payouts])
+    const topVendors = [...withdrawRequests]
+      .sort((a, b) => b.amount - a.amount)
+      .slice(0, 3);
+    const highestPayouts = [...withdrawRequests]
+      .sort((a, b) => b.amount - a.amount)
+      .slice(0, 3);
+    const recent = [...withdrawRequests]
+      .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
+      .slice(0, 5);
+    return { topVendors, highestPayouts, recent };
+  }, [withdrawRequests]);
 
+  // Local filtering for date and amount ranges (since API doesn't support them yet)
   const filtered = useMemo(() => {
-    const query = q.trim().toLowerCase()
-    const from = fromDate.trim() || undefined
-    const to = toDate.trim() || undefined
-    const min = minAmount.trim() === '' ? undefined : Number(minAmount)
-    const max = maxAmount.trim() === '' ? undefined : Number(maxAmount)
+    const from = fromDate.trim() || undefined;
+    const to = toDate.trim() || undefined;
+    const min = minAmount.trim() === "" ? undefined : Number(minAmount);
+    const max = maxAmount.trim() === "" ? undefined : Number(maxAmount);
 
-    return payouts.filter((p) => {
-      const matchesTab =
-        tab === 'all'
-          ? true
-          : tab === 'pending'
-            ? p.status === 'pending' || p.status === 'hold'
-            : p.status === tab
+    return withdrawRequests.filter((p) => {
+      const matchesFrom = !from || p.createdAt.split("T")[0] >= from;
+      const matchesTo = !to || p.createdAt.split("T")[0] <= to;
+      const matchesMin =
+        min === undefined || (!Number.isNaN(min) && p.amount >= min);
+      const matchesMax =
+        max === undefined || (!Number.isNaN(max) && p.amount <= max);
 
-      const matchesQuery =
-        query.length === 0 ||
-        p.vendor.toLowerCase().includes(query) ||
-        p.id.toLowerCase().includes(query)
-
-      const matchesStatus = status === 'all' || p.status === status
-      const matchesFrom = !from || p.requestDate >= from
-      const matchesTo = !to || p.requestDate <= to
-      const matchesMin = min === undefined || (!Number.isNaN(min) && p.amount >= min)
-      const matchesMax = max === undefined || (!Number.isNaN(max) && p.amount <= max)
-
-      return matchesTab && matchesQuery && matchesStatus && matchesFrom && matchesTo && matchesMin && matchesMax
-    })
-  }, [payouts, tab, q, status, fromDate, toDate, minAmount, maxAmount])
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize))
-  const paged = filtered.slice((page - 1) * pageSize, page * pageSize)
+      return matchesFrom && matchesTo && matchesMin && matchesMax;
+    });
+  }, [withdrawRequests, fromDate, toDate, minAmount, maxAmount]);
 
   const pageNumbers = useMemo(() => {
-    const delta = 2
-    const start = Math.max(1, page - delta)
-    const end = Math.min(totalPages, page + delta)
-    const nums: number[] = []
-    for (let p = start; p <= end; p++) nums.push(p)
-    return nums
-  }, [page, totalPages])
+    const delta = 2;
+    const start = Math.max(1, page - delta);
+    const end = Math.min(totalPages, page + delta);
+    const nums: number[] = [];
+    for (let p = start; p <= end; p++) nums.push(p);
+    return nums;
+  }, [page, totalPages]);
 
-  function setPayoutStatus(id: string, next: PayoutStatus) {
-    setPayouts((prev) => prev.map((p) => (p.id === id ? { ...p, status: next } : p)))
-    setSelected((prev) => (prev?.id === id ? { ...prev, status: next } : prev))
+  async function handleStatusUpdate(
+    id: string,
+    nextStatus: WithdrawRequestStatus,
+  ) {
+    try {
+      await updateStatus({ id, status: nextStatus }).unwrap();
+      if (selected?._id === id) {
+        setSelected({ ...selected, status: nextStatus });
+      }
+    } catch (err) {
+      console.error("Failed to update status", err);
+    }
   }
 
-  function commissionFor(p: PayoutRow) {
-    // fee based on payout amount (simplified)
-    const fee = Math.round(p.amount * commissionRate * 100) / 100
-    const vendorEarning = Math.round((p.amount - fee) * 100) / 100
-    return { fee, vendorEarning }
+  function commissionFor(p: WithdrawRequest) {
+    const fee = Math.round(p.amount * commissionRate * 100) / 100;
+    const vendorEarning = Math.round((p.amount - fee) * 100) / 100;
+    return { fee, vendorEarning };
   }
 
   return (
@@ -225,22 +205,39 @@ export default function PayoutsPage() {
           <Input
             value={q}
             onChange={(e) => {
-              setQ(e.target.value)
-              setPage(1)
+              setQ(e.target.value);
+              setPage(1);
             }}
-            placeholder="Search vendor / payout id…"
+            placeholder="Search vendor…"
             className="w-full md:w-65"
           />
         </div>
       }
     >
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }} className="space-y-4">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25 }}
+        className="space-y-4"
+      >
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
           {[
-            { label: 'Total Revenue', value: formatMoney(summary.totalRevenue) },
-            { label: 'Total Payouts', value: formatMoney(summary.totalPayouts) },
-            { label: 'Pending Payouts', value: formatMoney(summary.pendingPayouts) },
-            { label: 'Platform Earnings (commission)', value: formatMoney(summary.platformEarnings) },
+            {
+              label: "Total Revenue (Est.)",
+              value: formatMoney(summary.totalRevenue),
+            },
+            {
+              label: "Total Payouts",
+              value: formatMoney(summary.totalPayouts),
+            },
+            {
+              label: "Pending Payouts",
+              value: formatMoney(summary.pendingPayouts),
+            },
+            {
+              label: "Platform Earnings (Est.)",
+              value: formatMoney(summary.platformEarnings),
+            },
           ].map((s, idx) => (
             <motion.div
               key={s.label}
@@ -251,10 +248,14 @@ export default function PayoutsPage() {
             >
               <Card className="transition-shadow hover:shadow-lg">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm text-muted-foreground">{s.label}</CardTitle>
+                  <CardTitle className="text-sm text-muted-foreground">
+                    {s.label}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-semibold text-foreground">{s.value}</div>
+                  <div className="text-2xl font-semibold text-foreground">
+                    {s.value}
+                  </div>
                 </CardContent>
               </Card>
             </motion.div>
@@ -265,15 +266,18 @@ export default function PayoutsPage() {
           <Card className="xl:col-span-7">
             <CardHeader className="flex-row items-center justify-between">
               <CardTitle>Payout approvals</CardTitle>
-              <div className="text-sm text-muted-foreground">{filtered.length} results</div>
+              <div className="text-sm text-muted-foreground">
+                {pagination?.total || 0} results
+              </div>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="grid grid-cols-1 gap-2 md:grid-cols-5">
                 <select
                   value={status}
                   onChange={(e) => {
-                    setStatus(e.target.value as PayoutStatus | 'all')
-                    setPage(1)
+                    setStatus(e.target.value as WithdrawRequestStatus | "all");
+                    setPage(1);
+                    setTab("all");
                   }}
                   className="h-10 rounded-lg border border-[#EEE7DF] bg-white px-3 text-sm"
                 >
@@ -281,30 +285,31 @@ export default function PayoutsPage() {
                   <option value="pending">Pending</option>
                   <option value="hold">Hold</option>
                   <option value="approved">Approved</option>
+                  <option value="rejected">Rejected</option>
                   <option value="flagged">Flagged</option>
                 </select>
                 <Input
                   type="date"
                   value={fromDate}
                   onChange={(e) => {
-                    setFromDate(e.target.value)
-                    setPage(1)
+                    setFromDate(e.target.value);
+                    setPage(1);
                   }}
                 />
                 <Input
                   type="date"
                   value={toDate}
                   onChange={(e) => {
-                    setToDate(e.target.value)
-                    setPage(1)
+                    setToDate(e.target.value);
+                    setPage(1);
                   }}
                 />
                 <Input
                   inputMode="numeric"
                   value={minAmount}
                   onChange={(e) => {
-                    setMinAmount(e.target.value)
-                    setPage(1)
+                    setMinAmount(e.target.value);
+                    setPage(1);
                   }}
                   placeholder="Min $"
                 />
@@ -312,8 +317,8 @@ export default function PayoutsPage() {
                   inputMode="numeric"
                   value={maxAmount}
                   onChange={(e) => {
-                    setMaxAmount(e.target.value)
-                    setPage(1)
+                    setMaxAmount(e.target.value);
+                    setPage(1);
                   }}
                   placeholder="Max $"
                 />
@@ -322,8 +327,8 @@ export default function PayoutsPage() {
               <Tabs
                 value={tab}
                 onValueChange={(v) => {
-                  setTab(v as typeof tab)
-                  setPage(1)
+                  setTab(v as typeof tab);
+                  setPage(1);
                 }}
               >
                 <TabsList>
@@ -335,105 +340,170 @@ export default function PayoutsPage() {
 
                 <TabsContent value={tab} className="mt-3">
                   <div className="w-full overflow-x-auto">
-                  <Table className="w-full">
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-30 py-3 text-xs font-medium uppercase tracking-wide text-[#895129b3]">Payout ID</TableHead>
-                        <TableHead className="min-w-52.5 py-3 text-xs font-medium uppercase tracking-wide text-[#895129b3]">Vendor</TableHead>
-                        <TableHead className="w-30 py-3 text-right text-xs font-medium uppercase tracking-wide text-[#895129b3]">Amount</TableHead>
-                        <TableHead className="w-22.5 py-3 text-center text-xs font-medium uppercase tracking-wide text-[#895129b3]">Orders</TableHead>
-                        <TableHead className="w-25 py-3 text-xs font-medium uppercase tracking-wide text-[#895129b3]">Method</TableHead>
-                        <TableHead className="w-32.5 py-3 text-xs font-medium uppercase tracking-wide text-[#895129b3]">Request Date</TableHead>
-                        <TableHead className="w-25 py-3 text-xs font-medium uppercase tracking-wide text-[#895129b3]">Status</TableHead>
-                        <TableHead className="w-35 py-3 pr-6 text-right text-xs font-medium uppercase tracking-wide text-[#895129b3]">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {paged.length === 0 ? (
+                    <Table className="w-full">
+                      <TableHeader>
                         <TableRow>
-                          <TableCell colSpan={8} className="text-muted-foreground">
-                            No payout requests.
-                          </TableCell>
+                          <TableHead className="w-30 py-3 text-xs font-medium uppercase tracking-wide text-[#895129b3]">
+                            Payout ID
+                          </TableHead>
+                          <TableHead className="min-w-52.5 py-3 text-xs font-medium uppercase tracking-wide text-[#895129b3]">
+                            User
+                          </TableHead>
+                          <TableHead className="w-30 py-3 text-right text-xs font-medium uppercase tracking-wide text-[#895129b3]">
+                            Amount
+                          </TableHead>
+                          <TableHead className="w-25 py-3 text-xs font-medium uppercase tracking-wide text-[#895129b3] ml-4">
+                            Method
+                          </TableHead>
+                          <TableHead className="w-32.5 py-3 text-xs font-medium uppercase tracking-wide text-[#895129b3]">
+                            Request Date
+                          </TableHead>
+                          <TableHead className="w-25 py-3 text-xs font-medium uppercase tracking-wide text-[#895129b3]">
+                            Status
+                          </TableHead>
+                          <TableHead className="w-35 py-3 pr-6 text-right text-xs font-medium uppercase tracking-wide text-[#895129b3]">
+                            Actions
+                          </TableHead>
                         </TableRow>
-                      ) : (
-                        paged.map((p) => (
-                          <MotionTableRow
-                            key={p.id}
-                            whileHover={{ scale: 1.01 }}
-                            transition={{ duration: 0.12 }}
-                          >
-                            <TableCell className="align-middle py-3 font-medium">{p.id}</TableCell>
-                            <TableCell className="min-w-45 align-middle py-3">
-                              <div className="space-y-1">
-                                <div className="flex items-center gap-1.5">
-                                  <span className="whitespace-nowrap font-medium leading-none">{p.vendor}</span>
-                                  {(p.refundRatio >= 0.2 || p.suspiciousVendor) && (
-                                    <div title={p.suspiciousVendor ? 'Suspicious activity' : 'High refund rate'}>
-                                      <AlertTriangle
-                                        className="h-3.5 w-3.5 text-amber-500"
-                                        aria-label={p.suspiciousVendor ? 'Suspicious activity' : 'High refund rate'}
-                                      />
-                                    </div>
-                                  )}
-                                </div>
-                                <div className="text-xs text-muted-foreground">{p.vendorCountry}</div>
-                              </div>
+                      </TableHeader>
+                      <TableBody>
+                        {isFetching ? (
+                          <TableRow>
+                            <TableCell
+                              colSpan={7}
+                              className="text-center py-8 text-muted-foreground"
+                            >
+                              Loading...
                             </TableCell>
-                            <TableCell className="align-middle py-3 text-right">{formatMoney(p.amount)}</TableCell>
-                            <TableCell className="align-middle py-3 text-center">{p.orders}</TableCell>
-                            <TableCell className="align-middle py-3 text-muted-foreground">{p.method}</TableCell>
-                            <TableCell className="align-middle py-3 text-muted-foreground">{p.requestDate}</TableCell>
-                            <TableCell className="align-middle py-3">
-                              <motion.div
-                                key={`${p.id}-${p.status}`}
-                                initial={{ opacity: 0.6, scale: 0.98 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{ duration: 0.18 }}
-                                className="inline-block"
+                          </TableRow>
+                        ) : filtered.length === 0 ? (
+                          <TableRow>
+                            <TableCell
+                              colSpan={7}
+                              className="text-center py-8 text-muted-foreground"
+                            >
+                              No payout requests found.
+                            </TableCell>
+                          </TableRow>
+                        ) : (
+                          filtered.map((p) => (
+                            <MotionTableRow
+                              key={p._id}
+                              whileHover={{ scale: 1.01 }}
+                              transition={{ duration: 0.12 }}
+                            >
+                              <TableCell
+                                className="align-middle py-3 font-medium text-xs max-w-[100px] truncate"
+                                title={p._id}
                               >
-                                <StatusBadge status={p.status} />
-                              </motion.div>
-                            </TableCell>
-                            <TableCell className="w-35 align-middle py-3 pr-6 text-right">
-                              <div className="flex items-center justify-end">
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      className="h-9 w-30 justify-between rounded-lg border border-[#89512920] bg-white px-3 text-xs text-[#895129] hover:bg-[#faf7f3]"
+                                {p._id}
+                              </TableCell>
+                              <TableCell className="min-w-45 align-middle py-3">
+                                <div className="space-y-1">
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="whitespace-nowrap font-medium leading-none">
+                                      {p.user?.name}
+                                    </span>
+                                  </div>
+                                  <div className="text-xs text-muted-foreground">
+                                    {p.user?.email}
+                                  </div>
+                                </div>
+                              </TableCell>
+                              <TableCell className="align-middle py-3 text-right">
+                                {formatMoney(p.amount)}
+                              </TableCell>
+                              <TableCell className="align-middle py-3 text-muted-foreground capitalize ml-4">
+                                {p.method}
+                              </TableCell>
+                              <TableCell className="align-middle py-3 text-muted-foreground">
+                                {new Date(p.createdAt).toLocaleDateString()}
+                              </TableCell>
+                              <TableCell className="align-middle py-3">
+                                <motion.div
+                                  key={`${p._id}-${p.status}`}
+                                  initial={{ opacity: 0.6, scale: 0.98 }}
+                                  animate={{ opacity: 1, scale: 1 }}
+                                  transition={{ duration: 0.18 }}
+                                  className="inline-block"
+                                >
+                                  <StatusBadge status={p.status} />
+                                </motion.div>
+                              </TableCell>
+                              <TableCell className="w-35 align-middle py-3 pr-6 text-right">
+                                <div className="flex items-center justify-end">
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-9 w-30 justify-between rounded-lg border border-[#89512920] bg-white px-3 text-xs text-[#895129] hover:bg-[#faf7f3]"
+                                      >
+                                        Actions
+                                        <ChevronDown className="h-3.5 w-3.5" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent
+                                      align="end"
+                                      className="min-w-40"
                                     >
-                                      Actions
-                                      <ChevronDown className="h-3.5 w-3.5" />
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end" className="min-w-40">
-                                    {(p.status === 'pending' || p.status === 'hold') && (
-                                      <>
-                                        <DropdownMenuItem onClick={() => setPayoutStatus(p.id, 'approved')}>
-                                          Approve
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => setPayoutStatus(p.id, 'hold')}>
-                                          Hold
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => setPayoutStatus(p.id, 'flagged')}>
-                                          Flag
-                                        </DropdownMenuItem>
-                                      </>
-                                    )}
-                                    <DropdownMenuItem onClick={() => setSelected(p)}>
-                                      <Eye className="mr-2 h-4 w-4" />
-                                      View details
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
-                              </div>
-                            </TableCell>
-                          </MotionTableRow>
-                        ))
-                      )}
-                    </TableBody>
-                  </Table>
+                                      {(p.status === "pending" ||
+                                        p.status === "hold") && (
+                                        <>
+                                          <DropdownMenuItem
+                                            onClick={() =>
+                                              handleStatusUpdate(
+                                                p._id,
+                                                "approved",
+                                              )
+                                            }
+                                          >
+                                            Approve
+                                          </DropdownMenuItem>
+                                          <DropdownMenuItem
+                                            onClick={() =>
+                                              handleStatusUpdate(
+                                                p._id,
+                                                "rejected",
+                                              )
+                                            }
+                                          >
+                                            Reject
+                                          </DropdownMenuItem>
+                                          <DropdownMenuItem
+                                            onClick={() =>
+                                              handleStatusUpdate(p._id, "hold")
+                                            }
+                                          >
+                                            Hold
+                                          </DropdownMenuItem>
+                                          <DropdownMenuItem
+                                            onClick={() =>
+                                              handleStatusUpdate(
+                                                p._id,
+                                                "flagged",
+                                              )
+                                            }
+                                          >
+                                            Flag
+                                          </DropdownMenuItem>
+                                        </>
+                                      )}
+                                      <DropdownMenuItem
+                                        onClick={() => setSelected(p)}
+                                      >
+                                        <Eye className="mr-2 h-4 w-4" />
+                                        View details
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </div>
+                              </TableCell>
+                            </MotionTableRow>
+                          ))
+                        )}
+                      </TableBody>
+                    </Table>
                   </div>
 
                   <div className="mt-4 flex items-center justify-between">
@@ -453,7 +523,7 @@ export default function PayoutsPage() {
                       {pageNumbers.map((p) => (
                         <Button
                           key={p}
-                          variant={p === page ? 'default' : 'outline'}
+                          variant={p === page ? "default" : "outline"}
                           size="sm"
                           className="h-9 w-9 px-0"
                           onClick={() => setPage(p)}
@@ -466,7 +536,9 @@ export default function PayoutsPage() {
                         size="sm"
                         className="h-9 px-3"
                         disabled={page >= totalPages}
-                        onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                        onClick={() =>
+                          setPage((p) => Math.min(totalPages, p + 1))
+                        }
                       >
                         Next
                       </Button>
@@ -485,42 +557,84 @@ export default function PayoutsPage() {
               <div className="rounded-2xl border border-[#EEE7DF] p-4">
                 <div className="text-sm font-medium">Top earning vendors</div>
                 <div className="mt-3 space-y-2">
-                  {insights.topVendors.map((v) => (
-                    <div key={v.id} className="flex items-center justify-between text-sm">
-                      <div className="font-medium">{v.vendor}</div>
-                      <div className="text-muted-foreground">{formatMoney(v.vendorTotalEarnings)}</div>
+                  {insights.topVendors.length > 0 ? (
+                    insights.topVendors.map((v, idx) => (
+                      <div
+                        key={`${v._id}-${idx}`}
+                        className="flex items-center justify-between text-sm"
+                      >
+                        <div className="font-medium">{v.user?.name}</div>
+                        <div className="text-muted-foreground">
+                          {formatMoney(v.amount)}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-xs text-muted-foreground">
+                      No data available
                     </div>
-                  ))}
+                  )}
                 </div>
               </div>
 
               <div className="rounded-2xl border border-[#EEE7DF] p-4">
                 <div className="text-sm font-medium">Highest payouts</div>
                 <div className="mt-3 space-y-2">
-                  {insights.highestPayouts.map((p) => (
-                    <div key={p.id} className="flex items-center justify-between text-sm">
-                      <div className="font-medium">{p.vendor}</div>
-                      <div className="text-muted-foreground">{formatMoney(p.amount)}</div>
+                  {insights.highestPayouts.length > 0 ? (
+                    insights.highestPayouts.map((p, idx) => (
+                      <div
+                        key={`${p._id}-${idx}`}
+                        className="flex items-center justify-between text-sm"
+                      >
+                        <div className="font-medium">{p.user?.name}</div>
+                        <div className="text-muted-foreground">
+                          {formatMoney(p.amount)}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-xs text-muted-foreground">
+                      No data available
                     </div>
-                  ))}
+                  )}
                 </div>
               </div>
 
               <div className="rounded-2xl border border-[#EEE7DF] p-4">
                 <div className="text-sm font-medium">Recent transactions</div>
                 <div className="mt-3 space-y-2">
-                  {insights.recent.map((p) => (
-                    <div key={p.id} className="flex items-start justify-between gap-2 text-sm">
-                      <div>
-                        <div className="font-medium">{p.id}</div>
-                        <div className="text-xs text-muted-foreground">{p.vendor}</div>
+                  {insights.recent.length > 0 ? (
+                    insights.recent.map((p, idx) => (
+                      <div
+                        key={`${p._id}-${idx}`}
+                        className="flex items-start justify-between gap-2 text-sm"
+                      >
+                        <div>
+                          <div
+                            className="font-medium text-xs truncate max-w-[100px]"
+                            title={p._id}
+                          >
+                            {p._id}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {p.user?.name}
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-muted-foreground">
+                            {formatMoney(p.amount)}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {new Date(p.createdAt).toLocaleDateString()}
+                          </div>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <div className="text-muted-foreground">{formatMoney(p.amount)}</div>
-                        <div className="text-xs text-muted-foreground">{p.requestDate}</div>
-                      </div>
+                    ))
+                  ) : (
+                    <div className="text-xs text-muted-foreground">
+                      No data available
                     </div>
-                  ))}
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -528,30 +642,36 @@ export default function PayoutsPage() {
         </div>
       </motion.div>
 
-      <Dialog open={!!selected} onOpenChange={(open) => !open && setSelected(null)}>
+      <Dialog
+        open={!!selected}
+        onOpenChange={(open) => !open && setSelected(null)}
+      >
         <DialogContent className="max-w-3xl">
           <DialogHeader>
             <DialogTitle>Payout details</DialogTitle>
-            <DialogDescription>Vendor info, breakdown, commission and risk checks.</DialogDescription>
+            <DialogDescription>
+              Vendor info, payout info, and commission details.
+            </DialogDescription>
           </DialogHeader>
 
           {!selected ? null : (
-            <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.2 }} className="space-y-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.2 }}
+              className="space-y-4"
+            >
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div className="rounded-lg border border-[#EEE7DF] p-4">
-                  <div className="text-sm font-medium">Vendor info</div>
+                  <div className="text-sm font-medium">User info</div>
                   <div className="mt-3 space-y-2 text-sm">
                     <div className="flex items-center justify-between">
                       <div className="text-muted-foreground">Name</div>
-                      <div className="font-medium">{selected.vendor}</div>
+                      <div className="font-medium">{selected.user?.name}</div>
                     </div>
                     <div className="flex items-center justify-between">
-                      <div className="text-muted-foreground">Country</div>
-                      <div className="font-medium">{selected.vendorCountry}</div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="text-muted-foreground">Total earnings</div>
-                      <div className="font-medium">{formatMoney(selected.vendorTotalEarnings)}</div>
+                      <div className="text-muted-foreground">Email</div>
+                      <div className="font-medium">{selected.user?.email}</div>
                     </div>
                   </div>
                 </div>
@@ -561,15 +681,21 @@ export default function PayoutsPage() {
                   <div className="mt-3 space-y-2 text-sm">
                     <div className="flex items-center justify-between">
                       <div className="text-muted-foreground">Amount</div>
-                      <div className="font-medium">{formatMoney(selected.amount)}</div>
+                      <div className="font-medium">
+                        {formatMoney(selected.amount)}
+                      </div>
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="text-muted-foreground">Method</div>
-                      <div className="font-medium">{selected.method}</div>
+                      <div className="font-medium capitalize">
+                        {selected.method}
+                      </div>
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="text-muted-foreground">Request date</div>
-                      <div className="font-medium">{selected.requestDate}</div>
+                      <div className="font-medium">
+                        {new Date(selected.createdAt).toLocaleDateString()}
+                      </div>
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="text-muted-foreground">Status</div>
@@ -579,35 +705,29 @@ export default function PayoutsPage() {
                 </div>
               </div>
 
-              <div className="rounded-lg border border-[#EEE7DF] p-4">
-                <div className="text-sm font-medium">Orders breakdown</div>
-                <div className="mt-3 space-y-2">
-                  {selected.ordersBreakdown.slice(0, 8).map((o) => (
-                    <div key={o.id} className="flex items-center justify-between rounded-lg bg-black/2 p-3 text-sm">
-                      <div className="font-medium">{o.id}</div>
-                      <div className="font-medium">{formatMoney(o.amount)}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div className="rounded-lg border border-[#EEE7DF] p-4">
                   <div className="text-sm font-medium">Commission info</div>
                   {(() => {
-                    const { fee, vendorEarning } = commissionFor(selected)
+                    const { fee, vendorEarning } = commissionFor(selected);
                     return (
                       <div className="mt-3 space-y-2 text-sm">
                         <div className="flex items-center justify-between">
-                          <div className="text-muted-foreground">Platform fee ({Math.round(commissionRate * 100)}%)</div>
+                          <div className="text-muted-foreground">
+                            Platform fee ({Math.round(commissionRate * 100)}%)
+                          </div>
                           <div className="font-medium">{formatMoney(fee)}</div>
                         </div>
                         <div className="flex items-center justify-between">
-                          <div className="text-muted-foreground">Vendor earning</div>
-                          <div className="font-medium">{formatMoney(vendorEarning)}</div>
+                          <div className="text-muted-foreground">
+                            Vendor earning
+                          </div>
+                          <div className="font-medium">
+                            {formatMoney(vendorEarning)}
+                          </div>
                         </div>
                       </div>
-                    )
+                    );
                   })()}
                 </div>
 
@@ -617,16 +737,8 @@ export default function PayoutsPage() {
                     <ShieldAlert className="h-4 w-4 text-muted-foreground" />
                   </div>
                   <div className="mt-3 space-y-2 text-sm">
-                    <div className="flex items-center justify-between">
-                      <div className="text-muted-foreground">Refund ratio</div>
-                      <div className="font-medium">{Math.round(selected.refundRatio * 100)}%</div>
-                    </div>
                     <div className="flex flex-wrap gap-2">
-                      {selected.refundRatio >= 0.2 && <Badge variant="warning">⚠ High refund rate</Badge>}
-                      {selected.suspiciousVendor && <Badge variant="danger">🚫 Suspicious vendor</Badge>}
-                      {selected.refundRatio < 0.2 && !selected.suspiciousVendor && (
-                        <Badge variant="success">No issues detected</Badge>
-                      )}
+                      <Badge variant="success">Checks passed</Badge>
                     </div>
                   </div>
                 </div>
@@ -637,22 +749,24 @@ export default function PayoutsPage() {
                   Close
                 </Button>
                 <div className="flex flex-wrap justify-end gap-2">
-                  {(selected.status === 'pending' || selected.status === 'hold') && (
+                  {(selected.status === "pending" ||
+                    selected.status === "hold") && (
                     <>
                       <Button
                         className="bg-emerald-600 text-white hover:bg-emerald-600/90"
-                        onClick={() => setPayoutStatus(selected.id, 'approved')}
+                        onClick={() =>
+                          handleStatusUpdate(selected._id, "approved")
+                        }
                       >
                         Approve
                       </Button>
                       <Button
-                        className="bg-amber-500 text-white hover:bg-amber-500/90"
-                        onClick={() => setPayoutStatus(selected.id, 'hold')}
+                        variant="destructive"
+                        onClick={() =>
+                          handleStatusUpdate(selected._id, "rejected")
+                        }
                       >
-                        Hold
-                      </Button>
-                      <Button variant="destructive" onClick={() => setPayoutStatus(selected.id, 'flagged')}>
-                        Flag
+                        Reject
                       </Button>
                     </>
                   )}
@@ -663,6 +777,5 @@ export default function PayoutsPage() {
         </DialogContent>
       </Dialog>
     </PageShell>
-  )
+  );
 }
-

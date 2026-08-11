@@ -62,11 +62,11 @@ export const ordersApi = baseApi.injectEndpoints({
     }),
     getProductOrderById: build.query<SingleProductOrderResponse, string>({
       query: (id) => `/admin-dashboard/orders/products/${id}`,
-      providesTags: (result, error, arg) => [{ type: "Orders", id: arg }],
+      providesTags: (_result, _error, arg) => [{ type: "Orders", id: arg }],
     }),
     getServiceOrderById: build.query<SingleServiceOrderResponse, string>({
       query: (id) => `/admin-dashboard/orders/services/${id}`,
-      providesTags: (result, error, arg) => [{ type: "Orders", id: arg }],
+      providesTags: (_result, _error, arg) => [{ type: "Orders", id: arg }],
     }),
   }),
   overrideExisting: false,
