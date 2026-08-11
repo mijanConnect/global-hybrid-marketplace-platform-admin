@@ -24,6 +24,7 @@ export const baseApi = createApi({
     "DeliveryDrivers",
     "Profile",
     "Disclaimers",
+    "ServiceProviders",
   ],
   endpoints: () => ({}),
 });
