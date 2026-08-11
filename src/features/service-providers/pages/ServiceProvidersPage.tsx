@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
 import { Eye, Search } from "lucide-react";
 import { PageShell } from "@/components/PageShell";
 import { Button } from "@/components/ui/button";
@@ -19,8 +18,6 @@ import {
   useGetServiceProvidersQuery,
   useUpdateServiceProviderStatusMutation,
 } from "@/services/serviceProvidersApi";
-
-const MotionTableRow = motion(TableRow);
 
 export default function ServiceProvidersPage() {
   const navigate = useNavigate();
@@ -43,10 +40,10 @@ export default function ServiceProvidersPage() {
     if (!s) return providers;
     return providers.filter(
       (p) =>
-        p._id.toLowerCase().includes(s) ||
-        p.name.toLowerCase().includes(s) ||
+        p._id?.toLowerCase().includes(s) ||
+        p.name?.toLowerCase().includes(s) ||
         p.specialty?.toLowerCase().includes(s) ||
-        p.email.toLowerCase().includes(s) ||
+        p.email?.toLowerCase().includes(s) ||
         p.location?.toLowerCase().includes(s),
     );
   }, [q, providers]);
@@ -134,7 +131,7 @@ export default function ServiceProvidersPage() {
                   </TableRow>
                 ) : (
                   filtered.map((p) => (
-                    <MotionTableRow key={p._id} layout initial={false}>
+                    <TableRow key={p._id}>
                       <TableCell>
                         <div className="font-medium text-foreground">
                           {p.name}
@@ -175,7 +172,7 @@ export default function ServiceProvidersPage() {
                         {p.jobs}
                       </TableCell>
                       <TableCell className="text-right text-sm tabular-nums">
-                        {p.rating > 0 ? p.rating.toFixed(1) : "—"}
+                        {p.rating > 0 ? Number(p.rating).toFixed(1) : "—"}
                       </TableCell>
                       <TableCell className="min-w-40 pr-6 text-right">
                         <Button
@@ -192,7 +189,7 @@ export default function ServiceProvidersPage() {
                           View
                         </Button>
                       </TableCell>
-                    </MotionTableRow>
+                    </TableRow>
                   ))
                 )}
               </TableBody>
