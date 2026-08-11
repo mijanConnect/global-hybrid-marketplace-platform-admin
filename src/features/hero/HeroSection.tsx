@@ -1,143 +1,361 @@
-import { useMemo, useState } from "react";
-import { ImagePlus } from "lucide-react";
-
+import { useMemo, useState, useEffect, useRef } from "react";
+import { ImagePlus, Trash2, Edit } from "lucide-react";
 import { PageShell } from "@/components/PageShell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  useGetHeroSectionsQuery,
+  useCreateHeroSectionMutation,
+  useUpdateHeroSectionMutation,
+  useDeleteHeroSectionMutation,
+} from "@/services/heroApi";
+import type { HeroType } from "@/types/hero";
 
-type HeroType = "shop" | "service";
+export default function HeroSectionPage() {
+  const { data: response, isLoading } = useGetHeroSectionsQuery();
+  const [createHero, { isLoading: isCreating }] =
+    useCreateHeroSectionMutation();
+  const [updateHero, { isLoading: isUpdating }] =
+    useUpdateHeroSectionMutation();
+  const [deleteHero] = useDeleteHeroSectionMutation();
 
-export default function HeroSection() {
-  const [title, setTitle] = useState("Fresh Food Delivered");
-  const [description, setDescription] = useState(
-    "Fast delivery at your doorstep.",
-  );
+  const heroSections = response?.data || [];
 
-  const [image, setImage] = useState<string | null>(null);
+  const [isFormVisible, setIsFormVisible] = useState(false);
+  const [selectedHeroId, setSelectedHeroId] = useState<string | null>(null);
 
-  const [heroType, setHeroType] = useState<HeroType>("shop");
+  // Form states
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [heroType, setHeroType] = useState<HeroType>("product");
+  const [referenceId, setReferenceId] = useState(""); // product or service ID
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-  const buttonText = useMemo(() => {
-    return heroType === "shop" ? "Shop Now" : "Go To Service";
-  }, [heroType]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (selectedHeroId) {
+      const hero = heroSections.find((h) => h._id === selectedHeroId);
+      if (hero) {
+        setTitle(hero.header || "");
+        setDescription(hero.description || "");
+        setHeroType(hero.type || "product");
+        setImagePreview(
+          hero.image
+            ? `${(import.meta.env.VITE_API_BASE_URL ?? "http://localhost:4000").replace("/api/v1", "")}${hero.image}`
+            : null,
+        );
+        setSelectedFile(null);
+        if (hero.type === "product" && hero.product) {
+          setReferenceId(hero.product._id || hero.product);
+        } else if (hero.type === "service" && hero.service) {
+          setReferenceId(hero.service._id || hero.service);
+        } else {
+          setReferenceId("");
+        }
+        setIsFormVisible(true);
+      }
+    }
+  }, [selectedHeroId, heroSections]);
+
+  const handleCreateNew = () => {
+    setSelectedHeroId(null);
+    setTitle("");
+    setDescription("");
+    setHeroType("product");
+    setReferenceId("");
+    setImagePreview(null);
+    setSelectedFile(null);
+    setIsFormVisible(true);
+  };
 
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-
     if (!file) return;
 
     const url = URL.createObjectURL(file);
-
-    setImage(url);
+    setImagePreview(url);
+    setSelectedFile(file);
   };
 
+  const handleSave = async () => {
+    if (!title || !description) {
+      alert("Header and description are required");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("header", title);
+    formData.append("description", description);
+    formData.append("type", heroType);
+
+    if (heroType === "product" && referenceId) {
+      formData.append("product", referenceId);
+    } else if (heroType === "service" && referenceId) {
+      formData.append("service", referenceId);
+    }
+
+    if (selectedFile) {
+      formData.append("image", selectedFile);
+    }
+
+    try {
+      if (selectedHeroId) {
+        await updateHero({ id: selectedHeroId, formData }).unwrap();
+      } else {
+        if (!selectedFile) {
+          alert("Image is required when creating a new hero section");
+          return;
+        }
+        await createHero(formData).unwrap();
+      }
+      setIsFormVisible(false);
+      setSelectedHeroId(null);
+    } catch (error) {
+      console.error("Failed to save hero section:", error);
+      alert("Failed to save. Please try again.");
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (confirm("Are you sure you want to delete this hero section?")) {
+      try {
+        await deleteHero(id).unwrap();
+        if (selectedHeroId === id) {
+          setIsFormVisible(false);
+          setSelectedHeroId(null);
+        }
+      } catch (error) {
+        console.error("Failed to delete hero section:", error);
+      }
+    }
+  };
+
+  const buttonText = useMemo(() => {
+    return heroType === "product" ? "Shop Now" : "Go To Service";
+  }, [heroType]);
+
   return (
-    <PageShell title="Hero Section" description="Manage homepage hero content.">
-      <div className="grid gap-6 lg:grid-cols-[420px_1fr]">
-        {/* Form */}
-        <Card className="border-[#EEE7DF] shadow-soft">
-          <CardHeader>
-            <CardTitle>Update Hero</CardTitle>
+    <PageShell title="Hero Sections" description="Manage homepage hero slides.">
+      <div className="space-y-8">
+        <Card>
+          <CardHeader className="flex-row items-center justify-between">
+            <CardTitle>Existing Hero Sections</CardTitle>
+            <Button onClick={handleCreateNew}>Add New Hero</Button>
           </CardHeader>
-
-          <CardContent className="space-y-5">
-            <div>
-              <label className="mb-2 block text-sm font-medium">Header</label>
-
-              <Input value={title} onChange={(e) => setTitle(e.target.value)} />
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-medium">
-                Description
-              </label>
-
-              <textarea
-                rows={4}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className=" w-full rounded-xl border p-3"
-              />
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-medium">
-                Hero Type
-              </label>
-
-              <div className="flex gap-3">
-                <Button
-                  type="button"
-                  variant={heroType === "shop" ? "default" : "outline"}
-                  onClick={() => setHeroType("shop")}
-                >
-                  Shop
-                </Button>
-
-                <Button
-                  type="button"
-                  variant={heroType === "service" ? "default" : "outline"}
-                  onClick={() => setHeroType("service")}
-                >
-                  Service
-                </Button>
-              </div>
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-medium">
-                Upload Image
-              </label>
-
-              <label className="flex cursor-pointer items-center gap-3 rounded-xl border p-4">
-                <ImagePlus />
-                Select Image
-                <input
-                  type="file"
-                  hidden
-                  accept="image/*"
-                  onChange={handleUpload}
-                />
-              </label>
-            </div>
-
-            <Button className="w-full">Save Hero</Button>
-          </CardContent>
-        </Card>
-
-        {/* Preview */}
-        <Card className="overflow-hidden">
-          <CardHeader>
-            <CardTitle>Live Preview</CardTitle>
-          </CardHeader>
-
           <CardContent>
-            <div className="relative h-125 overflow-hidden rounded-3xl">
-              {image ? (
-                <img
-                  src={image}
-                  alt=""
-                  className="absolute inset-0 h-full w-full object-cover"
-                />
-              ) : (
-                <div className="h-full bg-[#F7F5F2]" />
-              )}
-
-              <div className="absolute inset-0 bg-black/40" />
-
-              <div className="absolute left-10 top-1/2 max-w-lg -translate-y-1/2 text-white">
-                <h1 className="text-5xl font-bold">{title}</h1>
-
-                <p className="mt-4">{description}</p>
-
-                <Button className="mt-6 bg-white text-black">
-                  {buttonText}
-                </Button>
+            {isLoading ? (
+              <div className="py-4 text-center text-muted-foreground">
+                Loading...
               </div>
-            </div>
+            ) : heroSections.length === 0 ? (
+              <div className="py-4 text-center text-muted-foreground">
+                No hero sections found.
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Image</TableHead>
+                      <TableHead>Header</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {heroSections.map((hero) => (
+                      <TableRow key={hero._id}>
+                        <TableCell>
+                          {hero.image ? (
+                            <img
+                              src={`${(import.meta.env.VITE_API_BASE_URL ?? "http://localhost:4000").replace("/api/v1", "")}${hero.image}`}
+                              alt={hero.header}
+                              className="h-12 w-20 rounded-md object-cover"
+                            />
+                          ) : (
+                            <div className="flex h-12 w-20 items-center justify-center rounded-md bg-gray-100 text-xs text-gray-400">
+                              No image
+                            </div>
+                          )}
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          {hero.header}
+                        </TableCell>
+                        <TableCell className="capitalize">
+                          {hero.type}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setSelectedHeroId(hero._id)}
+                            >
+                              <Edit className="mr-2 h-4 w-4" />
+                              Edit
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => handleDelete(hero._id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
           </CardContent>
         </Card>
+
+        {isFormVisible && (
+          <div className="grid gap-6 lg:grid-cols-[420px_1fr]" id="hero-form">
+            <Card className="border-[#EEE7DF] shadow-soft">
+              <CardHeader className="flex-row items-center justify-between">
+                <CardTitle>
+                  {selectedHeroId ? "Edit Hero" : "Create Hero"}
+                </CardTitle>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsFormVisible(false)}
+                >
+                  Cancel
+                </Button>
+              </CardHeader>
+              <CardContent className="space-y-5">
+                <div>
+                  <label className="mb-2 block text-sm font-medium">
+                    Header
+                  </label>
+                  <Input
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="e.g. Discover Our Latest Collection"
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium">
+                    Description
+                  </label>
+                  <textarea
+                    rows={4}
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    className="w-full rounded-xl border p-3"
+                    placeholder="Enter hero description..."
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium">
+                    Hero Type
+                  </label>
+                  <div className="flex gap-3">
+                    <Button
+                      type="button"
+                      variant={heroType === "product" ? "default" : "outline"}
+                      onClick={() => setHeroType("product")}
+                    >
+                      Product
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={heroType === "service" ? "default" : "outline"}
+                      onClick={() => setHeroType("service")}
+                    >
+                      Service
+                    </Button>
+                  </div>
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium capitalize">
+                    {heroType} ID
+                  </label>
+                  <Input
+                    value={referenceId}
+                    onChange={(e) => setReferenceId(e.target.value)}
+                    placeholder={`Paste ${heroType} ID here...`}
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium">
+                    Upload Image
+                  </label>
+                  <label className="flex cursor-pointer items-center gap-3 rounded-xl border p-4">
+                    <ImagePlus />
+                    {selectedFile
+                      ? selectedFile.name
+                      : imagePreview
+                        ? "Change Image"
+                        : "Select Image"}
+                    <input
+                      type="file"
+                      hidden
+                      accept="image/*"
+                      onChange={handleUpload}
+                      ref={fileInputRef}
+                    />
+                  </label>
+                </div>
+                <Button
+                  className="w-full"
+                  onClick={handleSave}
+                  disabled={isCreating || isUpdating}
+                >
+                  {isCreating || isUpdating ? "Saving..." : "Save Hero"}
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="overflow-hidden">
+              <CardHeader>
+                <CardTitle>Live Preview</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="relative h-125 overflow-hidden rounded-3xl">
+                  {imagePreview ? (
+                    <img
+                      src={imagePreview}
+                      alt=""
+                      className="absolute inset-0 h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="h-full bg-[#F7F5F2] flex items-center justify-center text-muted-foreground">
+                      No Image Selected
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-black/40" />
+                  <div className="absolute left-10 top-1/2 max-w-lg -translate-y-1/2 text-white">
+                    <h1 className="text-5xl font-bold">
+                      {title || "Your Header Here"}
+                    </h1>
+                    <p className="mt-4">
+                      {description || "Your description will appear here."}
+                    </p>
+                    <Button className="mt-6 bg-white text-black">
+                      {buttonText}
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
     </PageShell>
   );

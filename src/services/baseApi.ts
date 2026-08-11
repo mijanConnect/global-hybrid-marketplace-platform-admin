@@ -23,6 +23,7 @@ export const baseApi = createApi({
     "WithdrawRequests",
     "Analytics",
     "DeliveryDrivers",
+    "Hero",
     "Deliveries",
     "Profile",
     "Disclaimers",
