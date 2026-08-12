@@ -17,10 +17,17 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ShopDeliveryPage() {
-  const { data: deliveriesResponse, isLoading, isError } = useGetDeliveriesQuery({ limit: 100 });
-  const [updateStatus, { isLoading: updating }] = useUpdateDeliveryStatusMutation();
-  
-  const [activeTab, setActiveTab] = useState<"local" | "international">("local");
+  const {
+    data: deliveriesResponse,
+    isLoading,
+    isError,
+  } = useGetDeliveriesQuery({ limit: 100 });
+  const [updateStatus, { isLoading: updating }] =
+    useUpdateDeliveryStatusMutation();
+
+  const [activeTab, setActiveTab] = useState<"local" | "international">(
+    "local",
+  );
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState({ status: "" });
   const [page, setPage] = useState(1);
@@ -132,14 +139,14 @@ export default function ShopDeliveryPage() {
 
             <div className="mb-4 flex space-x-2 border-b border-gray-200 pb-2">
               <button
-                className={`px-4 py-2 text-sm font-medium rounded-t-lg ${activeTab === 'local' ? 'border-b-2 border-primary text-primary' : 'text-gray-500 hover:text-gray-700'}`}
-                onClick={() => setActiveTab('local')}
+                className={`px-4 py-2 text-sm font-medium rounded-t-lg ${activeTab === "local" ? "border-b-2 border-primary text-primary" : "text-gray-500 hover:text-gray-700"}`}
+                onClick={() => setActiveTab("local")}
               >
                 Local Delivery
               </button>
               <button
-                className={`px-4 py-2 text-sm font-medium rounded-t-lg ${activeTab === 'international' ? 'border-b-2 border-primary text-primary' : 'text-gray-500 hover:text-gray-700'}`}
-                onClick={() => setActiveTab('international')}
+                className={`px-4 py-2 text-sm font-medium rounded-t-lg ${activeTab === "international" ? "border-b-2 border-primary text-primary" : "text-gray-500 hover:text-gray-700"}`}
+                onClick={() => setActiveTab("international")}
               >
                 International
               </button>
@@ -150,39 +157,75 @@ export default function ShopDeliveryPage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {paged.length === 0 ? (
-                  <p className="text-muted-foreground text-sm py-8 col-span-full text-center">No deliveries found.</p>
+                  <p className="text-muted-foreground text-sm py-8 col-span-full text-center">
+                    No deliveries found.
+                  </p>
                 ) : (
                   paged.map((d: any) => (
-                    <Card key={d._id} className="shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                    <Card
+                      key={d._id}
+                      className="shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+                    >
                       <CardContent className="p-4 space-y-4">
                         <div className="flex justify-between items-start">
                           <div>
-                            <div className="font-semibold text-sm">Order: {d.orderId}</div>
-                            <div className="text-xs text-muted-foreground mt-1">Customer: {d.customer?.name}</div>
+                            <div className="font-semibold text-sm">
+                              Order: {d.orderId}
+                            </div>
+                            <div className="text-xs text-muted-foreground mt-1">
+                              Customer: {d.customer?.name}
+                            </div>
                           </div>
-                          <Badge variant={d.status === 'delivered' ? 'success' : d.status === 'in_transit' ? 'warning' : 'default'}>
-                            {d.status?.replace('_', ' ')}
+                          <Badge
+                            variant={
+                              d.status === "delivered"
+                                ? "success"
+                                : d.status === "in_transit"
+                                  ? "warning"
+                                  : "default"
+                            }
+                          >
+                            {d.status?.replace("_", " ")}
                           </Badge>
                         </div>
                         <div className="text-xs space-y-1">
                           <div className="flex justify-between">
                             <span className="text-gray-500">Pickup:</span>
-                            <span className="font-medium text-right ml-4 truncate">{d.pickupAddress}</span>
+                            <span className="font-medium text-right ml-4 truncate">
+                              {d.pickupAddress}
+                            </span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-gray-500">Dropoff:</span>
-                            <span className="font-medium text-right ml-4 truncate">{d.dropoffAddress}</span>
+                            <span className="font-medium text-right ml-4 truncate">
+                              {d.dropoffAddress}
+                            </span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-gray-500">Driver:</span>
-                            <span className="font-medium text-right ml-4 truncate">{d.rider?.name || 'Unassigned'}</span>
+                            <span className="font-medium text-right ml-4 truncate">
+                              {d.rider?.name || "Unassigned"}
+                            </span>
                           </div>
                         </div>
                         <div className="flex justify-end gap-2 pt-2">
-                          <Button size="sm" variant="outline" disabled={updating} onClick={() => updateStatus({ id: d._id, status: 'in_transit' })}>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={updating}
+                            onClick={() =>
+                              updateStatus({ id: d._id, status: "in_transit" })
+                            }
+                          >
                             In Transit
                           </Button>
-                          <Button size="sm" disabled={updating} onClick={() => updateStatus({ id: d._id, status: 'delivered' })}>
+                          <Button
+                            size="sm"
+                            disabled={updating}
+                            onClick={() =>
+                              updateStatus({ id: d._id, status: "delivered" })
+                            }
+                          >
                             Delivered
                           </Button>
                         </div>

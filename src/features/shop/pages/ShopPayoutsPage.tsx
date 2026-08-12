@@ -71,8 +71,10 @@ function withdrawStatusBadgeClass(s: string) {
 
 export default function ShopPayoutsPage() {
   const { data: wallet, isLoading } = useGetWalletQuery();
-  const [connectStripe, { isLoading: isConnecting }] = useConnectStripeMutation();
-  const [createWithdrawRequest, { isLoading: isWithdrawing }] = useCreateWithdrawRequestMutation();
+  const [connectStripe, { isLoading: isConnecting }] =
+    useConnectStripeMutation();
+  const [createWithdrawRequest, { isLoading: isWithdrawing }] =
+    useCreateWithdrawRequestMutation();
 
   const totalEarnings = wallet?.totalEarnings ?? 0;
   const availableBalance = wallet?.availableBalance ?? 0;
@@ -143,15 +145,14 @@ export default function ShopPayoutsPage() {
     );
   }, [transactions, txnSearch]);
 
-  const { data: rawWithdrawRequests, isLoading: isLoadingWithdraws } = useGetWithdrawRequestsQuery();
+  const { data: rawWithdrawRequests, isLoading: isLoadingWithdraws } =
+    useGetWithdrawRequestsQuery();
   const withdrawRequests = rawWithdrawRequests || [];
-  
+
   const filteredWithdrawRequests = useMemo(() => {
     const q = withdrawSearch.trim().toLowerCase();
     if (!q) return withdrawRequests;
-    return withdrawRequests.filter((r) =>
-      r._id.toLowerCase().includes(q),
-    );
+    return withdrawRequests.filter((r) => r._id.toLowerCase().includes(q));
   }, [withdrawRequests, withdrawSearch]);
 
   const tableRowClass =
@@ -285,7 +286,9 @@ export default function ShopPayoutsPage() {
                     <TableHead>Title</TableHead>
                     <TableHead className="w-[190px]">Date &amp; Time</TableHead>
                     <TableHead className="w-[160px]">Transaction ID</TableHead>
-                    <TableHead className="w-[120px] text-right">Amount</TableHead>
+                    <TableHead className="w-[120px] text-right">
+                      Amount
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 {isLoadingTxns ? (
@@ -379,7 +382,9 @@ export default function ShopPayoutsPage() {
                     <TableHead>Method</TableHead>
                     <TableHead className="w-[190px]">Date &amp; Time</TableHead>
                     <TableHead className="w-[160px]">Request ID</TableHead>
-                    <TableHead className="w-[120px] text-right">Amount</TableHead>
+                    <TableHead className="w-[120px] text-right">
+                      Amount
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 {isLoadingWithdraws ? (
@@ -459,7 +464,9 @@ export default function ShopPayoutsPage() {
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="space-y-2">
-                  <div className="text-sm font-medium text-gray-900">Amount</div>
+                  <div className="text-sm font-medium text-gray-900">
+                    Amount
+                  </div>
                   <Input
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
@@ -503,7 +510,10 @@ export default function ShopPayoutsPage() {
             </Card>
           </motion.div>
 
-          <motion.div variants={earningsPaymentCardVariants} className="min-h-0">
+          <motion.div
+            variants={earningsPaymentCardVariants}
+            className="min-h-0"
+          >
             <Card className="h-full rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow duration-200 hover:shadow-md">
               <CardHeader className="pb-2">
                 <CardTitle className="text-base">Payment Method</CardTitle>
@@ -522,8 +532,8 @@ export default function ShopPayoutsPage() {
                   className="inline-flex"
                   {...earningsButtonMotionProps}
                 >
-                  <Button 
-                    type="button" 
+                  <Button
+                    type="button"
                     variant="outline"
                     disabled={isConnecting}
                     onClick={handleConnectStripe}

@@ -2,11 +2,14 @@ import { useMemo, useState } from "react";
 import { useGetDashboardStatsQuery } from "@/services/dashboardApi";
 import { PageShell } from "@/components/PageShell";
 import { AnalyticsKPI } from "@/features/shop/components/analytics/AnalyticsKPI";
-import { RevenueChart, type AnalyticsRevenuePoint } from "@/features/shop/components/analytics/RevenueChart";
+import {
+  RevenueChart,
+  type AnalyticsRevenuePoint,
+} from "@/features/shop/components/analytics/RevenueChart";
 
 export default function ShopAnalyticsPage() {
   const [year, setYear] = useState<number>(new Date().getFullYear());
-  
+
   const { data: stats, isLoading, isError } = useGetDashboardStatsQuery();
 
   const chartPoints = useMemo<AnalyticsRevenuePoint[]>(() => {
@@ -14,7 +17,7 @@ export default function ShopAnalyticsPage() {
     return stats.revenueTrend.map((d) => ({
       label: d.date,
       revenue: d.revenue,
-      ordersJobs: stats.ordersTrend.find(o => o.date === d.date)?.orders || 0,
+      ordersJobs: stats.ordersTrend.find((o) => o.date === d.date)?.orders || 0,
     }));
   }, [stats]);
 
