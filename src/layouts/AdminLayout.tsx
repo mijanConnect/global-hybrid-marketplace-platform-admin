@@ -43,7 +43,7 @@ import { useGetProfileQuery } from "@/services/userApi";
 const COLLAPSE_KEY = "admin_sidebar_collapsed";
 const SETTINGS_OPEN_KEY = "admin_sidebar_settings_open";
 const VENDORS_OPEN_KEY = "admin_sidebar_vendors_open";
-const PRODUCTS_OPEN_KEY = "admin_sidebar_products_open";
+const SHOP_OPEN_KEY = "admin_sidebar_shop_open";
 
 function adminBreadcrumbItems(
   pathname: string,
@@ -171,12 +171,13 @@ export function AdminLayout() {
     return raw !== "0";
   });
 
-  const [productsOpen, setProductsOpen] = useState(() => {
-    const inProducts =
+  const [shopOpen, setShopOpen] = useState(() => {
+    const inShop =
       location.pathname.startsWith("/admin/categories") ||
-      location.pathname.startsWith("/products");
-    if (inProducts) return true;
-    const raw = localStorage.getItem(PRODUCTS_OPEN_KEY);
+      location.pathname.startsWith("/products") ||
+      location.pathname.startsWith("/shop");
+    if (inShop) return true;
+    const raw = localStorage.getItem(SHOP_OPEN_KEY);
     return raw !== "0";
   });
 
@@ -195,11 +196,12 @@ export function AdminLayout() {
   }, [location.pathname]);
 
   useEffect(() => {
-    const inProducts =
+    const inShop =
       location.pathname.startsWith("/admin/categories") ||
-      location.pathname.startsWith("/products");
-    if (!inProducts) return;
-    const t = window.setTimeout(() => setProductsOpen(true), 0);
+      location.pathname.startsWith("/products") ||
+      location.pathname.startsWith("/shop");
+    if (!inShop) return;
+    const t = window.setTimeout(() => setShopOpen(true), 0);
     return () => window.clearTimeout(t);
   }, [location.pathname]);
 
@@ -212,10 +214,11 @@ export function AdminLayout() {
         setSettingsOpen(false);
       if (!location.pathname.startsWith("/admin/vendors") && mql.matches)
         setVendorsOpen(false);
-      const inProductsRoute =
+      const inShopRoute =
         location.pathname.startsWith("/admin/categories") ||
-        location.pathname.startsWith("/products");
-      if (!inProductsRoute && mql.matches) setProductsOpen(false);
+        location.pathname.startsWith("/products") ||
+        location.pathname.startsWith("/shop");
+      if (!inShopRoute && mql.matches) setShopOpen(false);
     };
     handle();
     mql.addEventListener("change", handle);
@@ -237,12 +240,13 @@ export function AdminLayout() {
     const vendorsGroup = adminMenu.find(
       (i) => "children" in i && i.key === "vendors",
     );
-    const productsGroup = adminMenu.find(
-      (i) => "children" in i && i.key === "products",
+    const shopGroup = adminMenu.find(
+      (i) => "children" in i && i.key === "shop",
     );
 
     const mainKeys = new Set(["dashboard", "users"]);
     const managementLinkOrder = [
+      "categories",
       "service_providers",
       "services",
       "orders",
@@ -263,8 +267,8 @@ export function AdminLayout() {
       managementLinks,
       system,
       vendors: vendorsGroup && "children" in vendorsGroup ? vendorsGroup : null,
-      products:
-        productsGroup && "children" in productsGroup ? productsGroup : null,
+      shop:
+        shopGroup && "children" in shopGroup ? shopGroup : null,
       settings:
         settingsGroup && "children" in settingsGroup ? settingsGroup : null,
     };
@@ -572,25 +576,26 @@ export function AdminLayout() {
                     </div>
                   )}
 
-                  {/* Products accordion */}
-                  {sectionedMenu.products && (
+                  {/* Shop accordion */}
+                  {sectionedMenu.shop && (
                     <div className="space-y-1">
                       {(() => {
-                        const item = sectionedMenu.products;
+                        const item = sectionedMenu.shop;
                         const Icon = item.icon;
                         const isActive =
                           location.pathname.startsWith("/admin/categories") ||
-                          location.pathname.startsWith("/products");
-                        const open = productsOpen && (!collapsed || isMobile);
+                          location.pathname.startsWith("/products") ||
+                          location.pathname.startsWith("/shop");
+                        const open = shopOpen && (!collapsed || isMobile);
                         return (
                           <>
                             <button
                               type="button"
                               onClick={() => {
-                                const next = !productsOpen;
-                                setProductsOpen(next);
+                                const next = !shopOpen;
+                                setShopOpen(next);
                                 localStorage.setItem(
-                                  PRODUCTS_OPEN_KEY,
+                                  SHOP_OPEN_KEY,
                                   next ? "1" : "0",
                                 );
                               }}
@@ -608,7 +613,7 @@ export function AdminLayout() {
                             >
                               {isActive && (
                                 <motion.span
-                                  layoutId="sidebar-active-indicator-products"
+                                  layoutId="sidebar-active-indicator-shop"
                                   className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-full bg-[#895129]"
                                 />
                               )}

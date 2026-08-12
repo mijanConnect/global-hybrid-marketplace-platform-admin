@@ -70,6 +70,15 @@ const SettingsSecurityPage = lazy(
 const SettingsLegalPage = lazy(
   () => import("@/features/settings/pages/SettingsLegalPage"),
 );
+const ShopDeliveryPage = lazy(
+  () => import("@/features/shop/pages/ShopDeliveryPage"),
+);
+const ShopAnalyticsPage = lazy(
+  () => import("@/features/shop/pages/ShopAnalyticsPage"),
+);
+const ShopPayoutsPage = lazy(
+  () => import("@/features/shop/pages/ShopPayoutsPage"),
+);
 const NotFoundPage = lazy(() => import("@/routes/NotFoundPage"));
 
 import { CustomSpinner } from "@/components/common/CustomSpinner";
@@ -129,6 +138,9 @@ const router = createBrowserRouter([
       { path: "/admin/categories", element: <CategoriesPage /> },
       { path: "/products", element: <ProductsPage /> },
       { path: "/products/add", element: <AddProductPage /> },
+      { path: "/shop/delivery", element: <ShopDeliveryPage /> },
+      { path: "/shop/analytics", element: <ShopAnalyticsPage /> },
+      { path: "/shop/payouts", element: <ShopPayoutsPage /> },
       { path: "/services", element: <ServicesPage /> },
       { path: "/orders", element: <OrdersPage /> },
       { path: "/delivery", element: <DeliveryPage /> },
