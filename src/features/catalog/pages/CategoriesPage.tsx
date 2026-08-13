@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import {
   ChevronDown,
@@ -38,31 +38,41 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  type AdminCategory,
-  CATEGORY_RENAMED_EVENT,
-  CATALOG_PRODUCTS_UPDATED_EVENT,
-  loadCategories,
-  previewCountsFromSeed,
-  saveCategories,
-  slugify,
-} from "@/features/catalog/lib/categoriesStorage";
-import type { ProductRow } from "@/features/catalog/lib/mockProductsData";
-import { MOCK_PRODUCTS_SEED } from "@/features/catalog/lib/mockProductsData";
+  useGetCategoriesQuery,
+  useCreateCategoryMutation,
+  useUpdateCategoryMutation,
+  useDeleteCategoryMutation,
+} from "@/services/categoriesApi";
+import type { Category } from "@/services/categoriesApi";
+
+const baseApiUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:4000";
+const hostUrl = baseApiUrl.replace(/\/api\/v\d+\/?$/, "");
+
+function getImageUrl(path?: string) {
+  if (!path) return "";
+  if (path.startsWith("http") || path.startsWith("data:")) return path;
+  return `${hostUrl}${path.startsWith("/") ? "" : "/"}${path}`;
+}
+
+const slugify = (text: string) =>
+  text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, "-") // Replace spaces with -
+    .replace(/[^\w-]+/g, "") // Remove all non-word chars
+    .replace(/--+/g, "-"); // Replace multiple - with single -
 
 const MotionTableRow = motion(TableRow);
 
 function CategoryThumbnail({ url }: { url: string }) {
   const t = url.trim();
   const isHex = /^#([0-9a-f]{3,8})$/i.test(t);
-  const looksLikeUrl =
-    t.startsWith("http://") ||
-    t.startsWith("https://") ||
-    t.startsWith("data:") ||
-    t.startsWith("/");
-  if (looksLikeUrl) {
+
+  if (t && !isHex) {
     return (
       <img
-        src={t}
+        src={getImageUrl(t)}
         alt=""
         className="h-10 w-10 rounded-lg border border-[#EEE7DF] object-cover"
       />
@@ -76,17 +86,14 @@ function CategoryThumbnail({ url }: { url: string }) {
   );
 }
 
-/** Fills a square container (e.g. modal uploader preview). */
 function CategoryImageFill({ url }: { url: string }) {
   const t = url.trim();
   const isHex = /^#([0-9a-f]{3,8})$/i.test(t);
-  const looksLikeUrl =
-    t.startsWith("http://") ||
-    t.startsWith("https://") ||
-    t.startsWith("data:") ||
-    t.startsWith("/");
-  if (looksLikeUrl) {
-    return <img src={t} alt="" className="h-full w-full object-cover" />;
+
+  if (t && !isHex) {
+    return (
+      <img src={getImageUrl(t)} alt="" className="h-full w-full object-cover" />
+    );
   }
   return (
     <div
@@ -96,8 +103,8 @@ function CategoryImageFill({ url }: { url: string }) {
   );
 }
 
-function StatusBadge({ active }: { active: boolean }) {
-  return active ? (
+function StatusBadge({ status }: { status: string }) {
+  return status === "active" ? (
     <Badge variant="success">active</Badge>
   ) : (
     <Badge variant="secondary">inactive</Badge>
@@ -122,16 +129,15 @@ function FeaturedToggle({
       }}
       className={
         featured
-          ? "inline-flex h-7 w-12 shrink-0 items-center justify-end rounded-full bg-primary p-0.5 transition-colors"
-          : "inline-flex h-7 w-12 shrink-0 items-center justify-start rounded-full bg-muted p-0.5 transition-colors"
+          ? "inline-flex h-7 w-12 shrink-0 items-center justify-end rounded-full bg-[#895129] p-0.5 transition-colors"
+          : "inline-flex h-7 w-12 shrink-0 items-center justify-start rounded-full bg-gray-300 p-0.5 transition-colors shadow-inner"
       }
     >
-      <span className="block h-5 w-5 rounded-full bg-white shadow-sm" />
+      <span className="block h-5 w-5 rounded-full bg-white shadow-md" />
     </button>
   );
 }
 
-/** Compact switch for dialogs (smaller thumb / track). */
 function CompactSwitch({
   checked,
   onCheckedChange,
@@ -150,11 +156,11 @@ function CompactSwitch({
       onClick={onCheckedChange}
       className={
         checked
-          ? "inline-flex h-5 w-9 shrink-0 items-center justify-end rounded-full bg-primary p-px transition-colors"
-          : "inline-flex h-5 w-9 shrink-0 items-center justify-start rounded-full bg-[#e7e5e4] p-px transition-colors"
+          ? "inline-flex h-5 w-9 shrink-0 items-center justify-end rounded-full bg-[#895129] p-px transition-colors"
+          : "inline-flex h-5 w-9 shrink-0 items-center justify-start rounded-full bg-gray-300 p-px transition-colors shadow-inner"
       }
     >
-      <span className="pointer-events-none block h-4 w-4 rounded-full bg-white shadow-sm ring-1 ring-black/6" />
+      <span className="pointer-events-none block h-4 w-4 rounded-full bg-white shadow-md ring-1 ring-black/10" />
     </button>
   );
 }
@@ -163,27 +169,26 @@ type CategoryFormDraft = {
   id?: string;
   name: string;
   slug: string;
+  imageFile: File | null;
   imageUrl: string;
   featured: boolean;
   active: boolean;
+  type: string;
 };
 
 function emptyDraft(): CategoryFormDraft {
   return {
     name: "",
     slug: "",
+    imageFile: null,
     imageUrl: "",
     featured: false,
     active: true,
+    type: "product",
   };
 }
 
 export default function CategoriesPage() {
-  const [rows, setRows] = useState<AdminCategory[]>(() => loadCategories());
-  const [productCounts, setProductCounts] = useState<Record<string, number>>(
-    previewCountsFromSeed,
-  );
-
   const [q, setQ] = useState("");
   const [featuredFilter, setFeaturedFilter] = useState<"all" | "yes" | "no">(
     "all",
@@ -194,80 +199,27 @@ export default function CategoriesPage() {
   const [page, setPage] = useState(1);
   const pageSize = 8;
 
+  const { data: categoriesData, isLoading } = useGetCategoriesQuery({
+    page,
+    limit: pageSize,
+    searchTerm: q || undefined,
+    isFeatured: featuredFilter === "all" ? undefined : featuredFilter === "yes",
+    status: statusFilter === "all" ? undefined : statusFilter,
+  });
+
+  const [createCategory] = useCreateCategoryMutation();
+  const [updateCategory] = useUpdateCategoryMutation();
+  const [deleteCategory] = useDeleteCategoryMutation();
+
+  const categories = categoriesData?.data || [];
+  const totalPages = categoriesData?.pagination?.totalPage || 1;
+  const totalCategories = categoriesData?.pagination?.total || 0;
+
   const [modalOpen, setModalOpen] = useState(false);
   const [draft, setDraft] = useState(emptyDraft());
-  const [originalNameForRename, setOriginalNameForRename] = useState<
-    string | null
-  >(null);
   const modalFileInputRef = useRef<HTMLInputElement>(null);
   const [imageDropActive, setImageDropActive] = useState(false);
-
-  const [deleteTarget, setDeleteTarget] = useState<AdminCategory | null>(null);
-
-  const persist = useCallback((next: AdminCategory[]) => {
-    setRows(next);
-    saveCategories(next);
-  }, []);
-
-  useEffect(() => {
-    const onProducts = (e: Event) => {
-      const detail = (e as CustomEvent<ProductRow[]>).detail;
-      if (!Array.isArray(detail)) return;
-      const map: Record<string, number> = {};
-      for (const p of detail) {
-        map[p.category] = (map[p.category] ?? 0) + 1;
-      }
-      setProductCounts(map);
-    };
-    window.addEventListener(
-      CATALOG_PRODUCTS_UPDATED_EVENT,
-      onProducts as EventListener,
-    );
-    window.dispatchEvent(
-      new CustomEvent<ProductRow[]>(CATALOG_PRODUCTS_UPDATED_EVENT, {
-        detail: MOCK_PRODUCTS_SEED,
-      }),
-    );
-    return () =>
-      window.removeEventListener(
-        CATALOG_PRODUCTS_UPDATED_EVENT,
-        onProducts as EventListener,
-      );
-  }, []);
-
-  useEffect(() => {
-    const syncFromStorage = () => setRows(loadCategories());
-    window.addEventListener("storage", syncFromStorage);
-    return () => window.removeEventListener("storage", syncFromStorage);
-  }, []);
-
-  const stats = useMemo(() => {
-    const total = rows.length;
-    const featured = rows.filter((c) => c.featured).length;
-    const active = rows.filter((c) => c.active).length;
-    const hidden = rows.filter((c) => !c.active).length;
-    return { total, featured, active, hidden };
-  }, [rows]);
-
-  const filtered = useMemo(() => {
-    const query = q.trim().toLowerCase();
-    return rows.filter((c) => {
-      const matchesQ =
-        query.length === 0 ||
-        c.name.toLowerCase().includes(query) ||
-        c.slug.toLowerCase().includes(query);
-      const matchesFeat =
-        featuredFilter === "all" ||
-        (featuredFilter === "yes" ? c.featured : !c.featured);
-      const matchesStat =
-        statusFilter === "all" ||
-        (statusFilter === "active" ? c.active : !c.active);
-      return matchesQ && matchesFeat && matchesStat;
-    });
-  }, [rows, q, featuredFilter, statusFilter]);
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
-  const paged = filtered.slice((page - 1) * pageSize, page * pageSize);
+  const [deleteTarget, setDeleteTarget] = useState<Category | null>(null);
 
   const pageNumbers = useMemo(() => {
     const delta = 2;
@@ -279,20 +231,20 @@ export default function CategoriesPage() {
   }, [page, totalPages]);
 
   function openCreate() {
-    setOriginalNameForRename(null);
     setDraft(emptyDraft());
     setModalOpen(true);
   }
 
-  function openEdit(row: AdminCategory) {
-    setOriginalNameForRename(row.name);
+  function openEdit(row: Category) {
     setDraft({
-      id: row.id,
+      id: row._id,
       name: row.name,
       slug: row.slug,
-      imageUrl: row.imageUrl,
-      featured: row.featured,
-      active: row.active,
+      imageFile: null,
+      imageUrl: row.image || "",
+      featured: row.isFeatured,
+      active: row.status === "active",
+      type: row.type || "product",
     });
     setModalOpen(true);
   }
@@ -303,86 +255,80 @@ export default function CategoriesPage() {
     const reader = new FileReader();
     reader.onload = () => {
       const result = typeof reader.result === "string" ? reader.result : "";
-      if (result) setDraft((d) => ({ ...d, imageUrl: result }));
+      if (result)
+        setDraft((d) => ({ ...d, imageFile: file, imageUrl: result }));
     };
     reader.readAsDataURL(file);
   }, []);
 
-  function upsertDraft() {
+  async function upsertDraft() {
     const name = draft.name.trim();
     const slug = slugify(draft.slug.trim() || name);
     if (!name || !slug) return;
 
-    const slugTaken = rows.some((c) => c.slug === slug && c.id !== draft.id);
-    if (slugTaken) return;
-
-    if (draft.id) {
-      const prev = rows.find((c) => c.id === draft.id);
-      if (!prev) return;
-
-      const nextRows = rows.map((c) =>
-        c.id === draft.id
-          ? {
-              ...c,
-              name,
-              slug,
-              imageUrl: draft.imageUrl.trim() || "#f4f4f5",
-              featured: draft.featured,
-              active: draft.active,
-            }
-          : c,
-      );
-
-      const oldNameForProducts = prev.name;
-      if (originalNameForRename !== null && oldNameForProducts !== name) {
-        window.dispatchEvent(
-          new CustomEvent<{ from: string; to: string }>(
-            CATEGORY_RENAMED_EVENT,
-            {
-              detail: { from: oldNameForProducts, to: name },
-            },
-          ),
-        );
-      }
-
-      persist(nextRows);
-    } else {
-      const row: AdminCategory = {
-        id: `cat-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
-        name,
-        slug,
-        description: "",
-        imageUrl: draft.imageUrl.trim() || "#f4f4f5",
-        featured: draft.featured,
-        active: draft.active,
-        parentId: null,
-        createdAt: new Date().toISOString().slice(0, 10),
-      };
-      persist([...rows, row]);
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("slug", slug);
+    formData.append("type", draft.type);
+    formData.append("isFeatured", String(draft.featured));
+    formData.append("status", draft.active ? "active" : "inactive");
+    if (draft.imageFile) {
+      formData.append("image", draft.imageFile);
     }
-    setModalOpen(false);
-    setDraft(emptyDraft());
-    setOriginalNameForRename(null);
+
+    try {
+      if (draft.id) {
+        await updateCategory({ id: draft.id, body: formData }).unwrap();
+      } else {
+        await createCategory(formData).unwrap();
+      }
+      setModalOpen(false);
+      setDraft(emptyDraft());
+    } catch (err) {
+      console.error(err);
+    }
   }
 
-  function removeRow(id: string) {
-    persist(rows.filter((c) => c.id !== id && c.parentId !== id));
-    setDeleteTarget(null);
-    setPage(1);
+  async function removeRow(id: string) {
+    try {
+      await deleteCategory(id).unwrap();
+      setDeleteTarget(null);
+      if (categories.length === 1 && page > 1) {
+        setPage((p) => p - 1);
+      }
+    } catch (err) {
+      console.error(err);
+    }
   }
 
-  function toggleFeatured(id: string) {
-    persist(
-      rows.map((c) => (c.id === id ? { ...c, featured: !c.featured } : c)),
-    );
+  function toggleFeatured(category: Category) {
+    const fd = new FormData();
+    fd.append("name", category.name);
+    fd.append("slug", category.slug);
+    fd.append("type", category.type);
+    fd.append("isFeatured", String(!category.isFeatured));
+    fd.append("status", category.status);
+    updateCategory({ id: category._id, body: fd });
   }
 
-  function setHidden(id: string) {
-    persist(rows.map((c) => (c.id === id ? { ...c, active: false } : c)));
+  function setHidden(category: Category) {
+    const fd = new FormData();
+    fd.append("name", category.name);
+    fd.append("slug", category.slug);
+    fd.append("type", category.type);
+    fd.append("isFeatured", String(category.isFeatured));
+    fd.append("status", "inactive");
+    updateCategory({ id: category._id, body: fd });
   }
 
-  function setActive(id: string) {
-    persist(rows.map((c) => (c.id === id ? { ...c, active: true } : c)));
+  function setActive(category: Category) {
+    const fd = new FormData();
+    fd.append("name", category.name);
+    fd.append("slug", category.slug);
+    fd.append("type", category.type);
+    fd.append("isFeatured", String(category.isFeatured));
+    fd.append("status", "active");
+    updateCategory({ id: category._id, body: fd });
   }
 
   return (
@@ -434,41 +380,11 @@ export default function CategoriesPage() {
         transition={{ duration: 0.25 }}
         className="space-y-4"
       >
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {[
-            { label: "Total Categories", value: stats.total },
-            { label: "Featured Categories", value: stats.featured },
-            { label: "Active Categories", value: stats.active },
-            { label: "Hidden Categories", value: stats.hidden },
-          ].map((s, idx) => (
-            <motion.div
-              key={s.label}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.35, delay: idx * 0.05 }}
-              whileHover={{ y: -4 }}
-            >
-              <Card className="h-full rounded-2xl border border-[#89512914] bg-white transition-shadow hover:shadow-[0_10px_24px_rgba(137,81,41,0.10)]">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    {s.label}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-semibold text-foreground">
-                    {s.value}
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
-
         <Card>
           <CardHeader className="flex-row items-center justify-between">
             <CardTitle>Categories</CardTitle>
             <div className="text-sm text-muted-foreground">
-              {filtered.length} total
+              {totalCategories} total
             </div>
           </CardHeader>
           <CardContent>
@@ -486,7 +402,7 @@ export default function CategoriesPage() {
                       Slug
                     </TableHead>
                     <TableHead className="w-27.5 py-3 text-center text-xs font-medium uppercase tracking-wide text-[#895129b3]">
-                      Total Products
+                      Type
                     </TableHead>
                     <TableHead className="w-25 py-3 text-center text-xs font-medium uppercase tracking-wide text-[#895129b3]">
                       Featured
@@ -503,7 +419,13 @@ export default function CategoriesPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {paged.length === 0 ? (
+                  {isLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={8} className="py-10 text-center">
+                        Loading...
+                      </TableCell>
+                    </TableRow>
+                  ) : categories.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={8} className="py-10">
                         <div className="text-center text-sm text-muted-foreground">
@@ -512,14 +434,14 @@ export default function CategoriesPage() {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    paged.map((row) => (
+                    categories.map((row) => (
                       <MotionTableRow
-                        key={row.id}
+                        key={row._id}
                         whileHover={{ scale: 1.005 }}
                         transition={{ duration: 0.12 }}
                       >
                         <TableCell className="py-3 align-middle">
-                          <CategoryThumbnail url={row.imageUrl} />
+                          <CategoryThumbnail url={row.image} />
                         </TableCell>
                         <TableCell className="py-3 align-middle font-medium">
                           {row.name}
@@ -527,17 +449,17 @@ export default function CategoriesPage() {
                         <TableCell className="py-3 align-middle text-muted-foreground">
                           {row.slug}
                         </TableCell>
-                        <TableCell className="py-3 text-center align-middle tabular-nums">
-                          {productCounts[row.name] ?? 0}
+                        <TableCell className="py-3 text-center align-middle capitalize">
+                          {row.type}
                         </TableCell>
                         <TableCell className="py-3 text-center align-middle">
                           <FeaturedToggle
-                            featured={row.featured}
-                            onToggle={() => toggleFeatured(row.id)}
+                            featured={row.isFeatured}
+                            onToggle={() => toggleFeatured(row)}
                           />
                         </TableCell>
                         <TableCell className="py-3 align-middle">
-                          <StatusBadge active={row.active} />
+                          <StatusBadge status={row.status} />
                         </TableCell>
                         <TableCell className="py-3 align-middle text-muted-foreground">
                           {row.createdAt?.slice?.(0, 10) ?? "—"}
@@ -565,20 +487,20 @@ export default function CategoriesPage() {
                                   Edit
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
-                                  onClick={() => toggleFeatured(row.id)}
+                                  onClick={() => toggleFeatured(row)}
                                 >
                                   <Star className="mr-2 h-4 w-4" />
-                                  {row.featured ? "Unfeature" : "Feature"}
+                                  {row.isFeatured ? "Unfeature" : "Feature"}
                                 </DropdownMenuItem>
-                                {row.active ? (
+                                {row.status === "active" ? (
                                   <DropdownMenuItem
-                                    onClick={() => setHidden(row.id)}
+                                    onClick={() => setHidden(row)}
                                   >
                                     Hide
                                   </DropdownMenuItem>
                                 ) : (
                                   <DropdownMenuItem
-                                    onClick={() => setActive(row.id)}
+                                    onClick={() => setActive(row)}
                                   >
                                     Activate
                                   </DropdownMenuItem>
@@ -702,6 +624,26 @@ export default function CategoriesPage() {
                   setDraft((d) => ({ ...d, slug: e.target.value }))
                 }
               />
+            </div>
+
+            <div className="grid gap-1">
+              <label
+                htmlFor="cat-type"
+                className="text-xs font-medium text-muted-foreground"
+              >
+                Type
+              </label>
+              <select
+                id="cat-type"
+                value={draft.type}
+                onChange={(e) =>
+                  setDraft((d) => ({ ...d, type: e.target.value }))
+                }
+                className="h-9 rounded-md border border-[#EEE7DF] bg-white px-3 text-sm"
+              >
+                <option value="product">Product</option>
+                <option value="service">Service</option>
+              </select>
             </div>
 
             <div className="grid gap-1">
@@ -858,7 +800,7 @@ export default function CategoriesPage() {
             <Button
               variant="destructive"
               type="button"
-              onClick={() => deleteTarget && removeRow(deleteTarget.id)}
+              onClick={() => deleteTarget && removeRow(deleteTarget._id)}
             >
               Delete
             </Button>

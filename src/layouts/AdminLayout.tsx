@@ -267,8 +267,7 @@ export function AdminLayout() {
       managementLinks,
       system,
       vendors: vendorsGroup && "children" in vendorsGroup ? vendorsGroup : null,
-      shop:
-        shopGroup && "children" in shopGroup ? shopGroup : null,
+      shop: shopGroup && "children" in shopGroup ? shopGroup : null,
       settings:
         settingsGroup && "children" in settingsGroup ? settingsGroup : null,
     };

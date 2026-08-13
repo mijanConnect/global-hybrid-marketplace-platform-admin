@@ -28,6 +28,7 @@ export const baseApi = createApi({
     "Profile",
     "Disclaimers",
     "ServiceProviders",
+    "Categories",
   ],
   endpoints: () => ({}),
 });
