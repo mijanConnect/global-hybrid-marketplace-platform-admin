@@ -1,58 +1,90 @@
-import { baseApi } from '@/services/baseApi'
+import { baseApi } from "@/services/baseApi";
 
-export type VendorStatus = 'pending' | 'active' | 'suspended' | 'rejected'
+export type VendorStatus =
+  | "active"
+  | "inactive"
+  | "pending"
+  | "blocked"
+  | "rejected"
+  | "suspended";
 
-export type VendorRow = {
-  id: string
-  businessName: string
-  owner: string
-  status: VendorStatus
-  earnings: number
-}
+export type Vendor = {
+  _id: string;
+  name: string;
+  email: string;
+  phone: string;
+  profileImage: string;
+  status: string;
+  createdAt: string;
+  totalOrders: number;
+  businessName: string;
+  ownerName: string;
+  country: string;
+  earnings: number;
+};
 
-export type VendorDetails = VendorRow & {
-  country?: string
-  phone?: string
-  productsCount?: number
-  servicesCount?: number
-  performance?: {
-    rating?: number
-    completedOrders?: number
-    cancellationRate?: number
-  }
-}
+export type VendorsListResponse = {
+  success: boolean;
+  message: string;
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPage: number;
+  };
+  data: Vendor[];
+};
+
+export type VendorStatsResponse = {
+  success: boolean;
+  message: string;
+  data: {
+    totalVendors: number;
+    activeVendors: number;
+    inactiveVendors: number;
+  };
+};
+
+export type GetVendorsParams = {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: string;
+};
 
 export const vendorsApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
-    getVendors: build.query<{ pending: VendorRow[]; active: VendorRow[] }, void>({
-      query: () => ({ url: '/admin/vendors', method: 'GET' }),
-      providesTags: ['Vendors'],
-    }),
-    getVendorDetails: build.query<VendorDetails, string>({
-      query: (id) => ({ url: `/admin/vendors/${id}`, method: 'GET' }),
-      providesTags: ['Vendors'],
-    }),
-    approveVendor: build.mutation<void, { id: string; approve: boolean }>({
-      query: ({ id, approve }) => ({
-        url: `/admin/vendors/${id}/${approve ? 'approve' : 'reject'}`,
-        method: 'POST',
+    getVendors: build.query<VendorsListResponse, GetVendorsParams>({
+      query: (params) => ({
+        url: "/admin-dashboard/vendors",
+        method: "GET",
+        params,
       }),
-      invalidatesTags: ['Vendors', 'Dashboard'],
+      providesTags: ["Vendors"],
     }),
-    suspendVendor: build.mutation<void, { id: string; suspend: boolean }>({
-      query: ({ id, suspend }) => ({
-        url: `/admin/vendors/${id}/${suspend ? 'suspend' : 'unsuspend'}`,
-        method: 'POST',
+    getVendorStats: build.query<VendorStatsResponse, void>({
+      query: () => ({ url: "/admin-dashboard/vendors/stats", method: "GET" }),
+      providesTags: ["Vendors"],
+    }),
+    // Kept getVendorDetails for potential future use or if they provide it later
+    getVendorDetails: build.query<any, string>({
+      query: (id) => ({ url: `/admin-dashboard/vendors/${id}`, method: "GET" }),
+      providesTags: ["Vendors"],
+    }),
+    updateVendorStatus: build.mutation<void, { id: string; status: string }>({
+      query: ({ id, status }) => ({
+        url: `/admin-dashboard/vendors/${id}/status`,
+        method: "PATCH",
+        body: { status },
       }),
-      invalidatesTags: ['Vendors'],
+      invalidatesTags: ["Vendors"],
     }),
   }),
-})
+});
 
 export const {
   useGetVendorsQuery,
+  useGetVendorStatsQuery,
   useGetVendorDetailsQuery,
-  useApproveVendorMutation,
-  useSuspendVendorMutation,
-} = vendorsApi
-
+  useUpdateVendorStatusMutation,
+} = vendorsApi;

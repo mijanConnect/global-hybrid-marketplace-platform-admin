@@ -1,10 +1,10 @@
-import { useMemo, useState } from 'react'
-import { motion } from 'framer-motion'
-import { Eye } from 'lucide-react'
-import { PageShell } from '@/components/PageShell'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useMemo, useState } from "react";
+import { motion } from "framer-motion";
+import { Eye } from "lucide-react";
+import { PageShell } from "@/components/PageShell";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -12,9 +12,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table,
   TableBody,
@@ -22,111 +22,33 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { VendorStatsCards } from '@/features/vendors/components/VendorStatsCards'
+} from "@/components/ui/table";
+import { VendorStatsCards } from "@/features/vendors/components/VendorStatsCards";
+import {
+  useGetVendorsQuery,
+  useGetVendorStatsQuery,
+  useUpdateVendorStatusMutation,
+} from "@/features/vendors/vendorsApi";
+import type { Vendor } from "@/features/vendors/vendorsApi";
 
 function Money({ value }: { value: number }) {
   return (
     <span>
-      {new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(value)}
+      {new Intl.NumberFormat(undefined, {
+        style: "currency",
+        currency: "USD",
+      }).format(value)}
     </span>
-  )
+  );
 }
 
-type VendorStatus = 'pending' | 'active' | 'blocked'
-type VendorDocStatus = 'verified' | 'pending'
+const MotionTableRow = motion(TableRow);
 
-type VendorRow = {
-  id: string
-  businessName: string
-  owner: string
-  email: string
-  phone: string
-  country: string
-  status: VendorStatus
-  earnings: number
-  totalOrders: number
-  joinedAt: string
-  rating: number
-  items: Array<{ name: string; type: 'product' | 'service' }>
-  documents: {
-    tradeLicense: VendorDocStatus
-    idVerification: VendorDocStatus
-  }
-}
-
-const mockVendors: VendorRow[] = [
-  {
-    id: 'V-1001',
-    businessName: 'Brown Barrel Foods',
-    owner: 'Amina Rahman',
-    email: 'amina@test.com',
-    phone: '+880 1711-000000',
-    country: 'BD',
-    status: 'pending',
-    earnings: 0,
-    totalOrders: 0,
-    joinedAt: '2025-03-01',
-    rating: 0,
-    items: [
-      { name: 'Organic Honey', type: 'product' },
-      { name: 'Grocery Delivery', type: 'service' },
-    ],
-    documents: { tradeLicense: 'pending', idVerification: 'pending' },
-  },
-  {
-    id: 'V-1002',
-    businessName: 'Cedar & Co',
-    owner: 'James Carter',
-    email: 'james@cedarco.com',
-    phone: '+1 (415) 555-0199',
-    country: 'US',
-    status: 'active',
-    earnings: 1200,
-    totalOrders: 34,
-    joinedAt: '2025-02-10',
-    rating: 4.7,
-    items: [
-      { name: 'Artisan Coffee Beans', type: 'product' },
-      { name: 'Same-day Shipping', type: 'service' },
-      { name: 'Premium Gift Box', type: 'product' },
-    ],
-    documents: { tradeLicense: 'verified', idVerification: 'verified' },
-  },
-  {
-    id: 'V-1003',
-    businessName: 'Golden Grain',
-    owner: 'Nusrat Jahan',
-    email: 'nusrat@goldengrain.ae',
-    phone: '+971 50 000 0000',
-    country: 'AE',
-    status: 'blocked',
-    earnings: 540,
-    totalOrders: 12,
-    joinedAt: '2025-01-20',
-    rating: 4.2,
-    items: [
-      { name: 'Bakery Subscription', type: 'service' },
-      { name: 'Whole Wheat Flour', type: 'product' },
-    ],
-    documents: { tradeLicense: 'verified', idVerification: 'pending' },
-  },
-]
-
-const MotionTableRow = motion(TableRow)
-
-function StatusBadge({ status }: { status: VendorStatus }) {
-  if (status === 'pending') return <Badge variant="warning">pending</Badge>
-  if (status === 'blocked') return <Badge variant="danger">blocked</Badge>
-  return <Badge variant="success">active</Badge>
-}
-
-function DocBadge({ status }: { status: VendorDocStatus }) {
-  return status === 'verified' ? (
-    <Badge variant="success">verified</Badge>
-  ) : (
-    <Badge variant="warning">pending</Badge>
-  )
+function StatusBadge({ status }: { status: string }) {
+  if (status === "inactive" || status === "blocked")
+    return <Badge variant="danger">{status}</Badge>;
+  if (status === "pending") return <Badge variant="warning">pending</Badge>;
+  return <Badge variant="success">active</Badge>;
 }
 
 function EmptyState({ title, subtitle }: { title: string; subtitle: string }) {
@@ -140,108 +62,128 @@ function EmptyState({ title, subtitle }: { title: string; subtitle: string }) {
         xmlns="http://www.w3.org/2000/svg"
         className="opacity-70"
       >
-        <rect x="10" y="16" width="100" height="64" rx="10" fill="rgba(0,0,0,0.04)" />
-        <rect x="22" y="30" width="56" height="10" rx="5" fill="rgba(137,81,41,0.18)" />
-        <rect x="22" y="46" width="76" height="8" rx="4" fill="rgba(0,0,0,0.08)" />
-        <rect x="22" y="58" width="60" height="8" rx="4" fill="rgba(0,0,0,0.08)" />
+        <rect
+          x="10"
+          y="16"
+          width="100"
+          height="64"
+          rx="10"
+          fill="rgba(0,0,0,0.04)"
+        />
+        <rect
+          x="22"
+          y="30"
+          width="56"
+          height="10"
+          rx="5"
+          fill="rgba(137,81,41,0.18)"
+        />
+        <rect
+          x="22"
+          y="46"
+          width="76"
+          height="8"
+          rx="4"
+          fill="rgba(0,0,0,0.08)"
+        />
+        <rect
+          x="22"
+          y="58"
+          width="60"
+          height="8"
+          rx="4"
+          fill="rgba(0,0,0,0.08)"
+        />
       </svg>
       <div className="text-sm font-medium text-foreground">{title}</div>
       <div className="text-sm text-muted-foreground">{subtitle}</div>
     </div>
-  )
+  );
 }
 
 export default function VendorsPage() {
-  const [vendors, setVendors] = useState<VendorRow[]>(mockVendors)
-  const [tab, setTab] = useState<VendorStatus>('pending')
-  const [q, setQ] = useState('')
-  const [country, setCountry] = useState<string | 'all'>('all')
-  const [minEarnings, setMinEarnings] = useState('')
-  const [maxEarnings, setMaxEarnings] = useState('')
+  const [tab, setTab] = useState<string>("all");
+  const [q, setQ] = useState("");
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
 
-  const [selected, setSelected] = useState<VendorRow | null>(null)
-  const [confirmTarget, setConfirmTarget] = useState<VendorRow | null>(null)
+  const { data: statsData } = useGetVendorStatsQuery();
+  const { data: vendorsData, isLoading } = useGetVendorsQuery({
+    page,
+    limit: pageSize,
+    search: q || undefined,
+    status: tab !== "all" ? tab : undefined,
+  });
+  const [updateStatus] = useUpdateVendorStatusMutation();
+
+  const vendors = vendorsData?.data || [];
+  const totalPages = vendorsData?.pagination?.totalPage || 1;
+
+  const counts = {
+    total: statsData?.data.totalVendors || 0,
+    pending: 0,
+    active: statsData?.data.activeVendors || 0,
+    blocked: statsData?.data.inactiveVendors || 0,
+  };
+
+  const pageNumbers = useMemo(() => {
+    const delta = 2;
+    const start = Math.max(1, page - delta);
+    const end = Math.min(totalPages, page + delta);
+    const nums: number[] = [];
+    for (let p = start; p <= end; p++) nums.push(p);
+    return nums;
+  }, [page, totalPages]);
+
+  const [selected, setSelected] = useState<Vendor | null>(null);
+  const [confirmTarget, setConfirmTarget] = useState<Vendor | null>(null);
   const [pendingAction, setPendingAction] = useState<
-    'approve' | 'reject' | 'block' | 'unblock' | null
-  >(null)
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set())
+    "inactive" | "active" | null
+  >(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
 
-  const countries = useMemo(() => {
-    const set = new Set(vendors.map((v) => v.country).filter(Boolean))
-    return Array.from(set).sort((a, b) => a.localeCompare(b))
-  }, [vendors])
+  const allVisibleSelected =
+    vendors.length > 0 && vendors.every((v) => selectedIds.has(v._id));
 
-  const counts = useMemo(() => {
-    const total = vendors.length
-    const pending = vendors.filter((v) => v.status === 'pending').length
-    const active = vendors.filter((v) => v.status === 'active').length
-    const blocked = vendors.filter((v) => v.status === 'blocked').length
-    return { total, pending, active, blocked }
-  }, [vendors])
-
-  const filtered = useMemo(() => {
-    const query = q.trim().toLowerCase()
-    const min = minEarnings.trim() === '' ? undefined : Number(minEarnings)
-    const max = maxEarnings.trim() === '' ? undefined : Number(maxEarnings)
-
-    return vendors.filter((v) => {
-      const matchesTab = v.status === tab
-      const matchesQuery =
-        query.length === 0 ||
-        v.businessName.toLowerCase().includes(query) ||
-        v.owner.toLowerCase().includes(query)
-      const matchesCountry = country === 'all' || v.country === country
-      const matchesMin = min === undefined || (!Number.isNaN(min) && v.earnings >= min)
-      const matchesMax = max === undefined || (!Number.isNaN(max) && v.earnings <= max)
-      return matchesTab && matchesQuery && matchesCountry && matchesMin && matchesMax
-    })
-  }, [vendors, tab, q, country, minEarnings, maxEarnings])
-
-  const allVisibleSelected = filtered.length > 0 && filtered.every((v) => selectedIds.has(v.id))
-
-  function requestAction(v: VendorRow, action: NonNullable<typeof pendingAction>) {
-    setConfirmTarget(v)
-    setPendingAction(action)
+  function requestAction(v: Vendor, action: "inactive" | "active") {
+    setConfirmTarget(v);
+    setPendingAction(action);
   }
 
-  function applyAction() {
-    if (!confirmTarget || !pendingAction) return
-    setVendors((prev) =>
-      prev
-        .map((v) => {
-          if (v.id !== confirmTarget.id) return v
-          if (pendingAction === 'approve') return { ...v, status: 'active' }
-          if (pendingAction === 'reject') return null
-          if (pendingAction === 'block') return { ...v, status: 'blocked' }
-          if (pendingAction === 'unblock') return { ...v, status: 'active' }
-          return v
-        })
-        .filter(Boolean) as VendorRow[],
-    )
+  async function applyAction() {
+    if (!confirmTarget || !pendingAction) return;
+    try {
+      await updateStatus({
+        id: confirmTarget._id,
+        status: pendingAction,
+      }).unwrap();
+    } catch (err) {
+      console.error(err);
+    }
     setSelectedIds((prev) => {
-      const next = new Set(prev)
-      next.delete(confirmTarget.id)
-      return next
-    })
-    setConfirmTarget(null)
-    setPendingAction(null)
+      const next = new Set(prev);
+      next.delete(confirmTarget._id);
+      return next;
+    });
+    setConfirmTarget(null);
+    setPendingAction(null);
   }
 
-  function applyBulk(action: 'approve' | 'block' | 'unblock') {
-    if (selectedIds.size === 0) return
-    setVendors((prev) =>
-      prev.map((v) => {
-        if (!selectedIds.has(v.id)) return v
-        if (action === 'approve' && v.status === 'pending') return { ...v, status: 'active' }
-        if (action === 'block' && v.status === 'active') return { ...v, status: 'blocked' }
-        if (action === 'unblock' && v.status === 'blocked') return { ...v, status: 'active' }
-        return v
-      }),
-    )
-    setSelectedIds(new Set())
+  async function applyBulk(action: "active" | "inactive") {
+    if (selectedIds.size === 0) return;
+    try {
+      await Promise.all(
+        Array.from(selectedIds).map((id) =>
+          updateStatus({ id, status: action }).unwrap(),
+        ),
+      );
+    } catch (err) {
+      console.error(err);
+    }
+    setSelectedIds(new Set());
   }
 
-  const tabLabel = tab[0].toUpperCase() + tab.slice(1)
+  const tabLabel = tab[0].toUpperCase() + tab.slice(1);
 
   return (
     <PageShell
@@ -251,35 +193,12 @@ export default function VendorsPage() {
         <div className="flex w-full flex-col gap-2 md:w-auto md:flex-row md:items-center">
           <Input
             value={q}
-            onChange={(e) => setQ(e.target.value)}
+            onChange={(e) => {
+              setQ(e.target.value);
+              setPage(1);
+            }}
             placeholder="Search business/owner…"
             className="w-full md:w-65"
-          />
-          <select
-            value={country}
-            onChange={(e) => setCountry(e.target.value)}
-            className="h-10 rounded-lg border border-[#EEE7DF] bg-white px-3 text-sm"
-          >
-            <option value="all">All countries</option>
-            {countries.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
-          <Input
-            inputMode="numeric"
-            value={minEarnings}
-            onChange={(e) => setMinEarnings(e.target.value)}
-            placeholder="Min $"
-            className="w-full md:w-30"
-          />
-          <Input
-            inputMode="numeric"
-            value={maxEarnings}
-            onChange={(e) => setMaxEarnings(e.target.value)}
-            placeholder="Max $"
-            className="w-full md:w-30"
           />
         </div>
       }
@@ -295,63 +214,38 @@ export default function VendorsPage() {
           <CardHeader className="flex-row items-center justify-between">
             <CardTitle>Vendor management</CardTitle>
             <div className="text-sm text-muted-foreground">
-              {filtered.length} shown • {tabLabel}
+              {vendorsData?.pagination.total || 0} shown • {tabLabel}
             </div>
           </CardHeader>
           <CardContent>
             <Tabs
               value={tab}
               onValueChange={(v) => {
-                setTab(v as VendorStatus)
-                setSelectedIds(new Set())
+                setTab(v);
+                setPage(1);
+                setSelectedIds(new Set());
               }}
             >
               <TabsList>
-                <TabsTrigger value="pending">
-                  Pending{' '}
+                <TabsTrigger value="all">
+                  All{" "}
                   <Badge className="ml-2" variant="secondary">
-                    {counts.pending}
+                    {counts.total}
                   </Badge>
                 </TabsTrigger>
                 <TabsTrigger value="active">
-                  Active{' '}
+                  Active{" "}
                   <Badge className="ml-2" variant="secondary">
                     {counts.active}
                   </Badge>
                 </TabsTrigger>
-                <TabsTrigger value="blocked">
-                  Blocked{' '}
+                <TabsTrigger value="inactive">
+                  Inactive/Blocked{" "}
                   <Badge className="ml-2" variant="secondary">
                     {counts.blocked}
                   </Badge>
                 </TabsTrigger>
               </TabsList>
-
-              <TabsContent value="pending">
-                <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                  <div className="text-sm text-muted-foreground">
-                    Bulk actions: select vendors to approve.
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      className="bg-emerald-600 text-white hover:bg-emerald-600/90"
-                      disabled={selectedIds.size === 0}
-                      onClick={() => applyBulk('approve')}
-                    >
-                      Approve selected
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      disabled={selectedIds.size === 0}
-                      onClick={() => setSelectedIds(new Set())}
-                    >
-                      Clear selection
-                    </Button>
-                  </div>
-                </div>
-              </TabsContent>
 
               <TabsContent value="active">
                 <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
@@ -363,7 +257,7 @@ export default function VendorsPage() {
                       size="sm"
                       variant="destructive"
                       disabled={selectedIds.size === 0}
-                      onClick={() => applyBulk('block')}
+                      onClick={() => applyBulk("inactive")}
                     >
                       Block selected
                     </Button>
@@ -379,7 +273,7 @@ export default function VendorsPage() {
                 </div>
               </TabsContent>
 
-              <TabsContent value="blocked">
+              <TabsContent value="inactive">
                 <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                   <div className="text-sm text-muted-foreground">
                     Bulk actions: select vendors to unblock.
@@ -389,7 +283,7 @@ export default function VendorsPage() {
                       size="sm"
                       className="bg-emerald-600 text-white hover:bg-emerald-600/90"
                       disabled={selectedIds.size === 0}
-                      onClick={() => applyBulk('unblock')}
+                      onClick={() => applyBulk("active")}
                     >
                       Unblock selected
                     </Button>
@@ -414,13 +308,13 @@ export default function VendorsPage() {
                       type="checkbox"
                       checked={allVisibleSelected}
                       onChange={(e) => {
-                        const checked = e.target.checked
+                        const checked = e.target.checked;
                         setSelectedIds((prev) => {
-                          const next = new Set(prev)
-                          if (checked) filtered.forEach((v) => next.add(v.id))
-                          else filtered.forEach((v) => next.delete(v.id))
-                          return next
-                        })
+                          const next = new Set(prev);
+                          if (checked) vendors.forEach((v) => next.add(v._id));
+                          else vendors.forEach((v) => next.delete(v._id));
+                          return next;
+                        });
                       }}
                       aria-label="Select all"
                     />
@@ -438,46 +332,61 @@ export default function VendorsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filtered.length === 0 ? (
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={9} className="py-10 text-center">
+                      Loading...
+                    </TableCell>
+                  </TableRow>
+                ) : vendors.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={9}>
-                      <EmptyState title="No vendors found" subtitle="Try adjusting search or filters." />
+                      <EmptyState
+                        title="No vendors found"
+                        subtitle="Try adjusting search or filters."
+                      />
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filtered.map((v) => (
+                  vendors.map((v) => (
                     <MotionTableRow
-                      key={v.id}
+                      key={v._id}
                       whileHover={{ scale: 1.01 }}
                       transition={{ duration: 0.12 }}
                     >
                       <TableCell>
                         <input
                           type="checkbox"
-                          checked={selectedIds.has(v.id)}
+                          checked={selectedIds.has(v._id)}
                           onChange={(e) => {
-                            const checked = e.target.checked
+                            const checked = e.target.checked;
                             setSelectedIds((prev) => {
-                              const next = new Set(prev)
-                              if (checked) next.add(v.id)
-                              else next.delete(v.id)
-                              return next
-                            })
+                              const next = new Set(prev);
+                              if (checked) next.add(v._id);
+                              else next.delete(v._id);
+                              return next;
+                            });
                           }}
-                          aria-label={`Select ${v.id}`}
+                          aria-label={`Select ${v._id}`}
                         />
                       </TableCell>
-                      <TableCell className="font-medium">{v.businessName}</TableCell>
-                      <TableCell className="text-muted-foreground">{v.owner}</TableCell>
-                      <TableCell>{v.country}</TableCell>
+                      <TableCell className="font-medium">
+                        {v.businessName || "-"}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {v.ownerName || "-"}
+                      </TableCell>
+                      <TableCell>{v.country || "-"}</TableCell>
                       <TableCell>
                         <StatusBadge status={v.status} />
                       </TableCell>
-                      <TableCell>{v.totalOrders}</TableCell>
+                      <TableCell>{v.totalOrders || 0}</TableCell>
                       <TableCell>
-                        <Money value={v.earnings} />
+                        <Money value={v.earnings || 0} />
                       </TableCell>
-                      <TableCell className="text-muted-foreground">{v.joinedAt}</TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {new Date(v.createdAt).toLocaleDateString()}
+                      </TableCell>
                       <TableCell className="min-w-60 w-[18%] align-middle py-4 pr-6">
                         <div className="flex flex-nowrap items-center justify-end gap-2 whitespace-nowrap">
                           <motion.div
@@ -496,66 +405,33 @@ export default function VendorsPage() {
                             </Button>
                           </motion.div>
 
-                          {v.status === 'pending' ? (
-                            <>
-                              <motion.div
-                                className="inline-flex shrink-0 items-center leading-none"
-                                whileHover={{ scale: 1.03 }}
-                                whileTap={{ scale: 0.97 }}
-                              >
-                                <Button
-                                  type="button"
-                                  size="sm"
-                                  className="h-9 shrink-0 rounded-lg px-3.5 text-sm leading-none whitespace-nowrap bg-emerald-600 text-white hover:bg-emerald-600/90"
-                                  onClick={() => requestAction(v, 'approve')}
-                                >
-                                  Approve
-                                </Button>
-                              </motion.div>
-                              <motion.div
-                                className="inline-flex shrink-0 items-center leading-none"
-                                whileHover={{ scale: 1.03 }}
-                                whileTap={{ scale: 0.97 }}
-                              >
-                                <Button
-                                  type="button"
-                                  size="sm"
-                                  variant="destructive"
-                                  className="h-9 shrink-0 rounded-lg px-3.5 text-sm leading-none whitespace-nowrap"
-                                  onClick={() => requestAction(v, 'reject')}
-                                >
-                                  Reject
-                                </Button>
-                              </motion.div>
-                            </>
-                          ) : v.status === 'active' ? (
+                          {v.status === "inactive" ? (
                             <motion.div
-                              className="inline-flex shrink-0 items-center leading-none"
+                              className="inline-flex shrink-0 items-center justify-center leading-none"
                               whileHover={{ scale: 1.03 }}
                               whileTap={{ scale: 0.97 }}
                             >
                               <Button
-                                type="button"
                                 size="sm"
-                                className="h-9 shrink-0 rounded-lg border border-red-200 bg-[#fff1f1] px-3.5 text-sm font-medium leading-none whitespace-nowrap text-red-600 hover:bg-[#ffe6e6]"
-                                onClick={() => requestAction(v, 'block')}
+                                className="box-border h-9 shrink-0 rounded-lg bg-emerald-600 px-3 text-sm font-medium text-white hover:bg-emerald-600/90"
+                                onClick={() => requestAction(v, "active")}
                               >
-                                Block
+                                Unblock
                               </Button>
                             </motion.div>
                           ) : (
                             <motion.div
-                              className="inline-flex shrink-0 items-center leading-none"
+                              className="inline-flex shrink-0 items-center justify-center leading-none"
                               whileHover={{ scale: 1.03 }}
                               whileTap={{ scale: 0.97 }}
                             >
                               <Button
-                                type="button"
                                 size="sm"
-                                className="h-9 shrink-0 rounded-lg border border-green-200 bg-[#eefbf3] px-3.5 text-sm font-medium leading-none whitespace-nowrap text-green-700 hover:bg-[#e2f6ea]"
-                                onClick={() => requestAction(v, 'unblock')}
+                                variant="outline"
+                                className="box-border h-9 shrink-0 rounded-lg border-red-200 bg-[#fff1f1] px-3 text-sm font-medium text-red-600 hover:bg-[#ffe6e6]"
+                                onClick={() => requestAction(v, "inactive")}
                               >
-                                Unblock
+                                Block
                               </Button>
                             </motion.div>
                           )}
@@ -566,88 +442,101 @@ export default function VendorsPage() {
                 )}
               </TableBody>
             </Table>
+            <div className="mt-4 flex items-center justify-between">
+              <div className="text-sm text-muted-foreground">
+                Page {page} of {totalPages}
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  variant="outline"
+                  disabled={page <= 1}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                >
+                  Prev
+                </Button>
+                {pageNumbers.map((p) => (
+                  <Button
+                    key={p}
+                    variant={p === page ? "default" : "outline"}
+                    size="sm"
+                    className="h-9 w-9 px-0"
+                    onClick={() => setPage(p)}
+                  >
+                    {p}
+                  </Button>
+                ))}
+                <Button
+                  variant="outline"
+                  disabled={page >= totalPages}
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </motion.div>
 
-      <Dialog open={!!selected} onOpenChange={(open) => !open && setSelected(null)}>
-        <DialogContent className="max-w-2xl">
+      <Dialog
+        open={!!selected}
+        onOpenChange={(open) => !open && setSelected(null)}
+      >
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>Vendor details</DialogTitle>
-            <DialogDescription>Business info, performance, items and documents.</DialogDescription>
+            <DialogDescription>
+              Basic details for {selected?.businessName || selected?.name}
+            </DialogDescription>
           </DialogHeader>
 
-          {!selected ? null : (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.98 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.2 }}
-              className="space-y-4"
-            >
-              <div className="rounded-lg border border-[#EEE7DF] p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <div className="text-sm font-medium">{selected.businessName}</div>
-                    <div className="text-xs text-muted-foreground">{selected.owner}</div>
-                    <div className="mt-1 text-xs text-muted-foreground">
-                      {selected.email} • {selected.phone}
-                    </div>
+          {selected && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm font-medium">
+                    {selected.businessName || selected.name || "-"}
                   </div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <StatusBadge status={selected.status} />
-                    <Badge variant="secondary">{selected.country}</Badge>
+                  <div className="text-xs text-muted-foreground">
+                    {selected.email}
                   </div>
                 </div>
+                <StatusBadge status={selected.status} />
               </div>
 
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                <div className="rounded-lg border border-[#EEE7DF] p-3">
-                  <div className="text-xs text-muted-foreground">Total orders</div>
-                  <div className="text-lg font-semibold">{selected.totalOrders}</div>
+              <div className="grid grid-cols-2 gap-4 rounded-lg border border-[#EEE7DF] p-4 text-sm">
+                <div>
+                  <div className="text-xs text-muted-foreground">Owner</div>
+                  <div className="font-medium">{selected.ownerName || "-"}</div>
                 </div>
-                <div className="rounded-lg border border-[#EEE7DF] p-3">
+                <div>
+                  <div className="text-xs text-muted-foreground">Phone</div>
+                  <div className="font-medium">{selected.phone || "-"}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground">Country</div>
+                  <div className="font-medium">{selected.country || "-"}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground">Joined</div>
+                  <div className="font-medium">
+                    {new Date(selected.createdAt).toLocaleDateString()}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground">
+                    Total Orders
+                  </div>
+                  <div className="font-medium">{selected.totalOrders || 0}</div>
+                </div>
+                <div>
                   <div className="text-xs text-muted-foreground">Earnings</div>
-                  <div className="text-lg font-semibold">
-                    <Money value={selected.earnings} />
-                  </div>
-                </div>
-                <div className="rounded-lg border border-[#EEE7DF] p-3">
-                  <div className="text-xs text-muted-foreground">Rating</div>
-                  <div className="text-lg font-semibold">{selected.rating.toFixed(1)}</div>
-                </div>
-              </div>
-
-              <div className="rounded-lg border border-[#EEE7DF] p-4">
-                <div className="text-sm font-medium">Products / Services</div>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {selected.items.map((it, idx) => (
-                    <Badge key={`${it.name}-${idx}`} variant="secondary">
-                      {it.type === 'product' ? 'Product' : 'Service'} • {it.name}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-
-              <div className="rounded-lg border border-[#EEE7DF] p-4">
-                <div className="text-sm font-medium">Documents</div>
-                <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <div className="flex items-center justify-between rounded-lg bg-black/2 p-3">
-                    <div>
-                      <div className="text-sm font-medium">Trade license</div>
-                      <div className="text-xs text-muted-foreground">Business registration</div>
-                    </div>
-                    <DocBadge status={selected.documents.tradeLicense} />
-                  </div>
-                  <div className="flex items-center justify-between rounded-lg bg-black/2 p-3">
-                    <div>
-                      <div className="text-sm font-medium">ID verification</div>
-                      <div className="text-xs text-muted-foreground">Owner identity</div>
-                    </div>
-                    <DocBadge status={selected.documents.idVerification} />
+                  <div className="font-medium">
+                    {<Money value={selected.earnings || 0} />}
                   </div>
                 </div>
               </div>
-            </motion.div>
+            </div>
           )}
         </DialogContent>
       </Dialog>
@@ -656,50 +545,37 @@ export default function VendorsPage() {
         open={!!confirmTarget && !!pendingAction}
         onOpenChange={(open) => {
           if (!open) {
-            setConfirmTarget(null)
-            setPendingAction(null)
+            setConfirmTarget(null);
+            setPendingAction(null);
           }
         }}
       >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {pendingAction === 'approve'
-                ? 'Approve vendor?'
-                : pendingAction === 'reject'
-                  ? 'Reject vendor?'
-                  : pendingAction === 'block'
-                    ? 'Block vendor?'
-                    : 'Unblock vendor?'}
+              {pendingAction === "inactive"
+                ? "Block vendor?"
+                : "Unblock vendor?"}
             </DialogTitle>
             <DialogDescription>
               {confirmTarget
-                ? `This will update ${confirmTarget.businessName} (${confirmTarget.id}) immediately.`
-                : ''}
+                ? `${pendingAction === "inactive" ? "Blocking" : "Unblocking"} ${
+                    confirmTarget.businessName || confirmTarget.name
+                  } will immediately change their platform access.`
+                : ""}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button
               variant="outline"
               onClick={() => {
-                setConfirmTarget(null)
-                setPendingAction(null)
+                setConfirmTarget(null);
+                setPendingAction(null);
               }}
             >
               Cancel
             </Button>
-            {pendingAction === 'approve' ? (
-              <Button
-                className="bg-emerald-600 text-white hover:bg-emerald-600/90"
-                onClick={applyAction}
-              >
-                Approve
-              </Button>
-            ) : pendingAction === 'reject' ? (
-              <Button variant="destructive" onClick={applyAction}>
-                Reject
-              </Button>
-            ) : pendingAction === 'block' ? (
+            {pendingAction === "inactive" ? (
               <Button variant="destructive" onClick={applyAction}>
                 Block
               </Button>
@@ -715,6 +591,5 @@ export default function VendorsPage() {
         </DialogContent>
       </Dialog>
     </PageShell>
-  )
+  );
 }
-
