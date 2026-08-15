@@ -37,7 +37,7 @@ export interface CustomerDetailsResponse {
 export interface GetCustomersParams {
   page?: number;
   limit?: number;
-  search?: string;
+  searchTerm?: string;
   status?: string;
   role?: string;
 }

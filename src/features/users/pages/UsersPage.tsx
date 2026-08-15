@@ -91,7 +91,7 @@ export default function UsersPage() {
   const { data: customersData, isLoading } = useGetCustomersQuery({
     page,
     limit: pageSize,
-    search: q || undefined,
+    searchTerm: q || undefined,
     status: status !== "all" ? status : undefined,
     role: role !== "all" ? role : undefined,
   });
