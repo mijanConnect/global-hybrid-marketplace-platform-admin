@@ -5,6 +5,11 @@ export type DashboardStatsResponse = {
     orders: number;
     revenue: number;
   };
+  meta?: {
+    activeDeliveries: number;
+    pendingApprovals: number;
+    supportTickets: number;
+  };
   ordersTrend: { date: string; orders: number }[];
   revenueTrend: { date: string; revenue: number }[];
   pendingVendors: {
